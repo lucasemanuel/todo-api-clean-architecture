@@ -1,0 +1,24 @@
+{
+  "name": "rotate-traffic",
+  "version": "0.0.1",
+  "description": "System for rotate traffic",
+  "main": "index.js",
+  "author": "Lucas Emanuel",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon index.js"
+  },
+  "lint-staged": {
+    "*.js": "standard --fix"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "dotenv": "^9.0.2",
+    "husky": "^6.0.0",
+    "lint-staged": "^11.0.0",
+    "nodemon": "^2.0.7",
+    "standard": "^16.0.3"
+  }
+}
