@@ -1,3 +1,4 @@
+const HttpResponse = require('../helpers/http-response')
 const { ServerError, MissingParamError } = require('./errors')
 
 const makeSut = () => {
@@ -7,20 +8,10 @@ const makeSut = () => {
         const { task } = httpRequest.body
 
         if (!task) {
-          return {
-            statusCode: 400,
-            body: {
-              error: new MissingParamError('task')
-            }
-          }
+          return HttpResponse.badRequest(new MissingParamError('task'))
         }
       } catch (error) {
-        return {
-          statusCode: 500,
-          body: {
-            error: new ServerError()
-          }
-        }
+        return HttpResponse.serverError()
       }
     }
   }
