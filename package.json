@@ -1,7 +1,7 @@
 {
-  "name": "rotate-traffic",
+  "name": "todo-clean-architecture",
   "version": "0.0.1",
-  "description": "System for rotate traffic",
+  "description": "Todo list with clean architecture",
   "main": "index.js",
   "author": "Lucas Emanuel",
   "license": "MIT",
