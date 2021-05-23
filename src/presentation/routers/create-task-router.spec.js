@@ -1,5 +1,5 @@
 const HttpResponse = require('../helpers/http-response')
-const { ServerError, MissingParamError } = require('./errors')
+const { ServerError, MissingParamError } = require('../errors')
 
 const makeSut = () => {
   class CreateTaskRoute {
