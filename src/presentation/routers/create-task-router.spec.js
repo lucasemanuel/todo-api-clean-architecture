@@ -1,14 +1,17 @@
-const { ServerError } = require('./errors')
+const { ServerError, MissingParamError } = require('./errors')
 
 const makeSut = () => {
   class CreateTaskRoute {
     async route (httpRequest) {
       try {
-        const { email } = httpRequest.body
+        const { task } = httpRequest.body
 
-        if (!email) {
+        if (!task) {
           return {
-            statusCode: 400
+            statusCode: 400,
+            body: {
+              error: new MissingParamError('task')
+            }
           }
         }
       } catch (error) {
@@ -36,6 +39,7 @@ describe('Create Task', () => {
     }
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(400)
+    expect(httpResponse.body.error).toEqual(new MissingParamError('task'))
   })
   test('should return 500 if no httpRequest is provided', async () => {
     const { sut } = makeSut()
