@@ -1,21 +1,7 @@
-const HttpResponse = require('../helpers/http-response')
+const CreateTaskRouter = require('./create-task-router')
 const { ServerError, MissingParamError } = require('../errors')
 
 const makeSut = () => {
-  class CreateTaskRouter {
-    async route (httpRequest) {
-      try {
-        const { task } = httpRequest.body
-
-        if (!task) {
-          return HttpResponse.badRequest(new MissingParamError('task'))
-        }
-      } catch (error) {
-        return HttpResponse.serverError()
-      }
-    }
-  }
-
   const createTaskRouter = new CreateTaskRouter()
   return {
     sut: createTaskRouter
