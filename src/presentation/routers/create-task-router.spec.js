@@ -2,7 +2,7 @@ const HttpResponse = require('../helpers/http-response')
 const { ServerError, MissingParamError } = require('../errors')
 
 const makeSut = () => {
-  class CreateTaskRoute {
+  class CreateTaskRouter {
     async route (httpRequest) {
       try {
         const { task } = httpRequest.body
@@ -16,9 +16,9 @@ const makeSut = () => {
     }
   }
 
-  const createTaskRoute = new CreateTaskRoute()
+  const createTaskRouter = new CreateTaskRouter()
   return {
-    sut: createTaskRoute
+    sut: createTaskRouter
   }
 }
 
