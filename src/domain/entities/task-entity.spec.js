@@ -10,6 +10,7 @@ class TaskEntity {
   }
 
   unChecked () {
+    if (!this.isChecked) throw new Error('The task is not checked.')
     this.isChecked = false
   }
 }
@@ -32,8 +33,14 @@ describe('Task Entity', () => {
     }).toThrow()
   })
   test('should uncheck a task', () => {
-    const sut = makeTaskEntity()
+    const sut = makeTaskEntityChecked()
     sut.unChecked()
     expect(sut.isChecked).toBe(false)
+  })
+  test('should throw an error when trying uncheck a task not checked', () => {
+    const sut = makeTaskEntity()
+    expect(() => {
+      sut.unChecked()
+    }).toThrow()
   })
 })
