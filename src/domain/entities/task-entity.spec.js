@@ -1,27 +1,29 @@
 class TaskEntity {
-  constructor ({ description, isCheck = false }) {
+  constructor ({ description, isChecked = false }) {
     this.description = description
-    this.isCheck = isCheck
+    this.isChecked = isChecked
   }
 
-  check () {
-    this.isCheck = true
+  checked () {
+    this.isChecked = true
   }
 
-  unCheck () {
-    this.isCheck = false
+  unChecked () {
+    this.isChecked = false
   }
 }
 
+const makeTaskEntity = () => new TaskEntity({ description: 'any_task' })
+
 describe('Task Entity', () => {
   test('should check a task', () => {
-    const sut = new TaskEntity('any_task')
-    sut.check()
-    expect(sut.isCheck).toBe(true)
+    const sut = makeTaskEntity()
+    sut.checked()
+    expect(sut.isChecked).toBe(true)
   })
-  test('should uncheck an task', () => {
-    const sut = new TaskEntity('any_task')
-    sut.undoCheck()
-    expect(sut.isCheck).toBe(false)
+  test('should uncheck a task', () => {
+    const sut = makeTaskEntity()
+    sut.unChecked()
+    expect(sut.isChecked).toBe(false)
   })
 })
