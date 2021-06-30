@@ -1,31 +1,17 @@
+const CreateTaskUseCase = require('./create-task-usecase')
 const { MissingParamError, InvalidParamError } = require('../../utils/errors')
 
-class CreateTaskUseCase {
-  constructor ({ taskRepository } = {}) {
-    this.taskRepository = taskRepository
-  }
-
-  taskRepositoryIsValid () {
-    if (!this.taskRepository || !this.taskRepository.insert) {
-      throw new InvalidParamError('taskRepository')
+const makeTaskRepositorySpy = () => {
+  class TaskRepositorySpy {
+    async insert ({ description }) {
+      this.description = description
+      return {
+        description
+      }
     }
   }
 
-  async execute (description) {
-    if (!description) throw new MissingParamError('description')
-    this.taskRepositoryIsValid()
-    const task = await this.taskRepository.insert({ description })
-    return task
-  }
-}
-
-class TaskRepositorySpy {
-  async insert ({ description }) {
-    this.description = description
-    return {
-      description
-    }
-  }
+  return new TaskRepositorySpy()
 }
 
 const makeTaskRepositoryWithErrorSpy = () => {
@@ -39,7 +25,7 @@ const makeTaskRepositoryWithErrorSpy = () => {
 }
 
 const makeSut = () => {
-  const taskRepositorySpy = new TaskRepositorySpy()
+  const taskRepositorySpy = makeTaskRepositorySpy()
   const sut = new CreateTaskUseCase({ taskRepository: taskRepositorySpy })
 
   return {
