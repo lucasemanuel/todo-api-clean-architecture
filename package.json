@@ -13,9 +13,7 @@
     "test:integration": "jest --watchAll -c jest-integration.config.js"
   },
   "lint-staged": {
-    "*.js": "standard --fix",
-    "*.spec.js": "test:staged",
-    "*.test.js": "test:staged"
+    "*.js": ["standard --fix", "yarn test:staged"]
   },
   "dependencies": {
     "express": "^4.17.1"
