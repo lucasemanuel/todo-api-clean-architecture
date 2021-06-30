@@ -1,11 +1,4 @@
-const { MissingParamError } = require('../../utils/errors')
-
-class InvalidParamError extends Error {
-  constructor (paramName) {
-    super(`Invalid param: ${paramName}`)
-    this.name = 'InvalidParamError'
-  }
-}
+const { MissingParamError, InvalidParamError } = require('../../utils/errors')
 
 class CreateTaskUseCase {
   constructor ({ taskRepository } = {}) {
@@ -25,7 +18,7 @@ class CreateTaskUseCase {
 }
 
 class TaskRepository {
-  insert () {}
+  async insert () {}
 }
 
 const makeSut = () => {
