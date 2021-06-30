@@ -20,7 +20,9 @@ class CreateTaskUseCase {
 }
 
 class TaskRepository {
-  async insert ({ description }) {}
+  async insert ({ description }) {
+    this.description = description
+  }
 }
 
 const makeTaskRepositoryWithErrorSpy = () => {
@@ -35,12 +37,17 @@ const makeTaskRepositoryWithErrorSpy = () => {
 
 const makeSut = () => {
   const taskRepository = new TaskRepository()
-  return new CreateTaskUseCase({ taskRepository })
+  const sut = new CreateTaskUseCase({ taskRepository })
+
+  return {
+    sut,
+    taskRepository
+  }
 }
 
 describe('Check Task Use Case', () => {
   test('should throw if no description is provided', () => {
-    const sut = makeSut()
+    const { sut } = makeSut()
     const promise = sut.execute()
     expect(promise).rejects.toThrow(new MissingParamError('description'))
   })
@@ -55,9 +62,16 @@ describe('Check Task Use Case', () => {
     }
   })
   test('should throw if TaskRepository insert method throw error', () => {
-    const taskRepository = makeTaskRepositoryWithErrorSpy()
-    const sut = new CreateTaskUseCase({ taskRepository })
+    const taskRepositoryWithErrorSpy = makeTaskRepositoryWithErrorSpy()
+    const sut = new CreateTaskUseCase({
+      taskRepository: taskRepositoryWithErrorSpy
+    })
     const promise = sut.execute('any description')
     expect(promise).rejects.toThrow()
+  })
+  test('should call TaskRepository with correct description', async () => {
+    const { sut, taskRepository } = makeSut()
+    await sut.execute('any description')
+    expect(taskRepository.description).toBe('any description')
   })
 })
