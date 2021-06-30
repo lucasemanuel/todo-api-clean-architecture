@@ -4,12 +4,12 @@ class TaskEntity {
     this.isChecked = isChecked
   }
 
-  checked () {
+  check () {
     if (this.isChecked) throw new Error('The task is already checked.')
     this.isChecked = true
   }
 
-  unChecked () {
+  unCheck () {
     if (!this.isChecked) throw new Error('The task is not checked.')
     this.isChecked = false
   }

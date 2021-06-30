@@ -8,24 +8,24 @@ const makeTaskEntityChecked = () =>
 describe('Task Entity', () => {
   test('should check a task', () => {
     const sut = makeTaskEntity()
-    sut.checked()
+    sut.check()
     expect(sut.isChecked).toBe(true)
   })
   test('should throw an error when trying check a task already checked', () => {
     const sut = makeTaskEntityChecked()
     expect(() => {
-      sut.checked()
+      sut.check()
     }).toThrow()
   })
   test('should uncheck a task', () => {
     const sut = makeTaskEntityChecked()
-    sut.unChecked()
+    sut.unCheck()
     expect(sut.isChecked).toBe(false)
   })
   test('should throw an error when trying uncheck a task not checked', () => {
     const sut = makeTaskEntity()
     expect(() => {
-      sut.unChecked()
+      sut.unCheck()
     }).toThrow()
   })
 })
