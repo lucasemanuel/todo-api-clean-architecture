@@ -1,7 +1,7 @@
 const { MissingParamError } = require('../../utils/errors')
 
 class CreateTaskUseCase {
-  async create (description) {
+  async execute (description) {
     if (!description) throw new MissingParamError('description')
   }
 }
@@ -9,7 +9,7 @@ class CreateTaskUseCase {
 describe('Check Task Use Case', () => {
   test('should throw if no description is provided', () => {
     const createTaskUseCase = new CreateTaskUseCase()
-    const sut = createTaskUseCase.create()
+    const sut = createTaskUseCase.execute()
     expect(sut).rejects.toThrow(new MissingParamError('description'))
   })
 })
