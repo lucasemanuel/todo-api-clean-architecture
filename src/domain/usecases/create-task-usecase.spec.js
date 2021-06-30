@@ -19,9 +19,12 @@ class CreateTaskUseCase {
   }
 }
 
-class TaskRepository {
+class TaskRepositorySpy {
   async insert ({ description }) {
     this.description = description
+    return {
+      description
+    }
   }
 }
 
@@ -36,12 +39,12 @@ const makeTaskRepositoryWithErrorSpy = () => {
 }
 
 const makeSut = () => {
-  const taskRepository = new TaskRepository()
-  const sut = new CreateTaskUseCase({ taskRepository })
+  const taskRepositorySpy = new TaskRepositorySpy()
+  const sut = new CreateTaskUseCase({ taskRepository: taskRepositorySpy })
 
   return {
     sut,
-    taskRepository
+    taskRepositorySpy
   }
 }
 
@@ -70,8 +73,13 @@ describe('Check Task Use Case', () => {
     expect(promise).rejects.toThrow()
   })
   test('should call TaskRepository with correct description', async () => {
-    const { sut, taskRepository } = makeSut()
+    const { sut, taskRepositorySpy } = makeSut()
     await sut.execute('any description')
-    expect(taskRepository.description).toBe('any description')
+    expect(taskRepositorySpy.description).toBe('any description')
+  })
+  test('should return a new task', async () => {
+    const { sut } = makeSut()
+    const task = await sut.execute('any description')
+    expect(task).toBeTruthy()
   })
 })
