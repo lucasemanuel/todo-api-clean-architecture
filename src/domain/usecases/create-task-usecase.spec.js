@@ -14,11 +14,23 @@ class CreateTaskUseCase {
   async execute (description) {
     if (!description) throw new MissingParamError('description')
     this.taskRepositoryIsValid()
+    const task = await this.taskRepository.insert({ description })
+    return task
   }
 }
 
 class TaskRepository {
-  async insert () {}
+  async insert ({ description }) {}
+}
+
+const makeTaskRepositoryWithErrorSpy = () => {
+  class TaskRepositoryWithErrorSpy {
+    async insert () {
+      throw new Error()
+    }
+  }
+
+  return new TaskRepositoryWithErrorSpy()
 }
 
 const makeSut = () => {
@@ -41,5 +53,11 @@ describe('Check Task Use Case', () => {
       const promise = sut.execute('any description')
       expect(promise).rejects.toThrow(new InvalidParamError('taskRepository'))
     }
+  })
+  test('should throw if TaskRepository insert method throw error', () => {
+    const taskRepository = makeTaskRepositoryWithErrorSpy()
+    const sut = new CreateTaskUseCase({ taskRepository })
+    const promise = sut.execute('any description')
+    expect(promise).rejects.toThrow()
   })
 })
