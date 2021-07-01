@@ -13,13 +13,17 @@
     "test:integration": "jest --watchAll -c jest-integration.config.js"
   },
   "lint-staged": {
-    "*.js": ["standard --fix", "yarn test:staged"]
+    "*.js": [
+      "standard --fix",
+      "yarn test:staged"
+    ]
   },
   "dependencies": {
     "express": "^4.17.1"
   },
   "devDependencies": {
-    "dotenv": "^9.0.2",
+    "@shelf/jest-mongodb": "^1.2.5",
+    "dotenv": "^10.0.0",
     "husky": "^6.0.0",
     "jest": "^26.6.3",
     "lint-staged": "^11.0.0",
@@ -27,6 +31,8 @@
     "standard": "^16.0.3"
   },
   "standard": {
-    "env": ["jest"]
+    "env": [
+      "jest"
+    ]
   }
 }
