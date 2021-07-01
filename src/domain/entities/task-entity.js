@@ -1,5 +1,6 @@
 class TaskEntity {
-  constructor ({ description, isChecked = false }) {
+  constructor ({ id = undefined, description, isChecked = false }) {
+    this.id = id
     this.description = description
     this.isChecked = isChecked
   }

@@ -28,4 +28,12 @@ describe('Task Entity', () => {
       sut.unCheck()
     }).toThrow()
   })
+  test('should have the correct id value', () => {
+    const sut = new TaskEntity({
+      description: 'any description',
+      isChecked: false,
+      id: 1
+    })
+    expect(sut.id).toBe(1)
+  })
 })
