@@ -12,6 +12,9 @@ module.exports = {
     return this.client && this.client.topology.isConnected()
   },
   async disconnect () {
-    await this.client.close()
+    if (this.isConnected()) {
+      await this.client.close()
+      this.client = null
+    }
   }
 }
