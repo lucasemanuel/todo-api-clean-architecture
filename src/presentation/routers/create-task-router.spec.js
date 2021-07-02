@@ -1,11 +1,14 @@
 const CreateTaskRouter = require('./create-task-router')
 const { ServerError } = require('../errors')
 const { MissingParamError } = require('../../utils/errors')
+const TaskAdapter = require('../../adapters/task-adapter')
 
 class CreateTaskUseCaseSpy {
   async execute ({ description, isChecked }) {
     this.description = description
     this.isChecked = isChecked
+
+    return TaskAdapter.adapt({ description, isChecked })
   }
 }
 
@@ -15,7 +18,6 @@ const makeCreateTaskUseCaseWithError = () => {
       throw new Error()
     }
   }
-
   return new CreateTaskUseCaseWithError()
 }
 
@@ -65,7 +67,7 @@ describe('Create Task Router', () => {
     expect(createTaskUseCaseSpy.description).toBe(httpRequest.body.description)
     expect(createTaskUseCaseSpy.isChecked).toBe(httpRequest.body.isChecked)
   })
-  test('should return 500 if CreateTaskUseCase throws', async () => {
+  test('should return 500 if CreateTaskUseCase throws error', async () => {
     const createTaskUseCaseWithError = makeCreateTaskUseCaseWithError()
     const sut = new CreateTaskRouter({
       createTaskUseCase: createTaskUseCaseWithError
@@ -79,5 +81,18 @@ describe('Create Task Router', () => {
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(500)
     expect(httpResponse.body.error).toEqual(new ServerError())
+  })
+  test('should return 201 if is provided correct params', async () => {
+    const { sut } = makeSut()
+    const data = {
+      description: 'any description',
+      isChecked: false
+    }
+    const httpRequest = {
+      body: data
+    }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(201)
+    expect(httpResponse.body.task).toEqual({ ...data, id: undefined })
   })
 })

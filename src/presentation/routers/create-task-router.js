@@ -13,7 +13,16 @@ class CreateTaskRouter {
         return HttpResponse.badRequest(new MissingParamError('description'))
       }
 
-      await this.createTaskUseCase.execute({ description, isChecked })
+      const task = await this.createTaskUseCase.execute({
+        description,
+        isChecked
+      })
+      return {
+        statusCode: 201,
+        body: {
+          task
+        }
+      }
     } catch (error) {
       return HttpResponse.serverError()
     }
