@@ -9,6 +9,16 @@ class CreateTaskUseCaseSpy {
   }
 }
 
+const makeCreateTaskUseCaseWithError = () => {
+  class CreateTaskUseCaseWithError {
+    async execute ({ description, isChecked }) {
+      throw new Error()
+    }
+  }
+
+  return new CreateTaskUseCaseWithError()
+}
+
 const makeSut = () => {
   const createTaskUseCaseSpy = new CreateTaskUseCaseSpy()
   const sut = new CreateTaskRouter({ createTaskUseCase: createTaskUseCaseSpy })
@@ -43,7 +53,7 @@ describe('Create Task Router', () => {
     expect(httpResponse.statusCode).toBe(500)
     expect(httpResponse.body.error).toEqual(new ServerError())
   })
-  test('should call CreateTaskUseCase with correct params', () => {
+  test('should call CreateTaskUseCase with correct params', async () => {
     const { sut, createTaskUseCaseSpy } = makeSut()
     const httpRequest = {
       body: {
@@ -51,8 +61,23 @@ describe('Create Task Router', () => {
         isChecked: false
       }
     }
-    sut.route(httpRequest)
+    await sut.route(httpRequest)
     expect(createTaskUseCaseSpy.description).toBe(httpRequest.body.description)
     expect(createTaskUseCaseSpy.isChecked).toBe(httpRequest.body.isChecked)
+  })
+  test('should return 500 if CreateTaskUseCase throws', async () => {
+    const createTaskUseCaseWithError = makeCreateTaskUseCaseWithError()
+    const sut = new CreateTaskRouter({
+      createTaskUseCase: createTaskUseCaseWithError
+    })
+    const httpRequest = {
+      body: {
+        description: 'any description',
+        isChecked: false
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body.error).toEqual(new ServerError())
   })
 })
