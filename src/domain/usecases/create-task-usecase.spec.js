@@ -10,7 +10,6 @@ const makeTaskRepositorySpy = () => {
       }
     }
   }
-
   return new TaskRepositorySpy()
 }
 
@@ -20,14 +19,12 @@ const makeTaskRepositoryWithErrorSpy = () => {
       throw new Error()
     }
   }
-
   return new TaskRepositoryWithErrorSpy()
 }
 
 const makeSut = () => {
   const taskRepositorySpy = makeTaskRepositorySpy()
   const sut = new CreateTaskUseCase({ taskRepository: taskRepositorySpy })
-
   return {
     sut,
     taskRepositorySpy
@@ -46,7 +43,7 @@ describe('Check Task Use Case', () => {
       new CreateTaskUseCase({ taskRepository: {} })
     ]
     for (const sut of suts) {
-      const promise = sut.execute('any description')
+      const promise = sut.execute({ description: 'any description' })
       expect(promise).rejects.toThrow(new InvalidParamError('taskRepository'))
     }
   })
@@ -55,17 +52,17 @@ describe('Check Task Use Case', () => {
     const sut = new CreateTaskUseCase({
       taskRepository: taskRepositoryWithErrorSpy
     })
-    const promise = sut.execute('any description')
+    const promise = sut.execute({ description: 'any description' })
     expect(promise).rejects.toThrow()
   })
   test('should call TaskRepository with correct description', async () => {
     const { sut, taskRepositorySpy } = makeSut()
-    await sut.execute('any description')
+    await sut.execute({ description: 'any description' })
     expect(taskRepositorySpy.description).toBe('any description')
   })
   test('should return a new task', async () => {
     const { sut } = makeSut()
-    const task = await sut.execute('any description')
+    const task = await sut.execute({ description: 'any description' })
     expect(task).toBeTruthy()
   })
 })

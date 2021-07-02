@@ -11,7 +11,7 @@ class CreateTaskUseCase {
     }
   }
 
-  async execute (description) {
+  async execute ({ description } = {}) {
     if (!description) throw new MissingParamError('description')
     this.taskRepositoryIsValid()
     const task = await this.taskRepository.insert({ description })
