@@ -8,6 +8,9 @@ module.exports = {
       useUnifiedTopology: true
     })
   },
+  async isConnected () {
+    return this.client && this.client.topology.isConnected()
+  },
   async disconnect () {
     await this.client.close()
   }
