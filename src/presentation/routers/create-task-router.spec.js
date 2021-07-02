@@ -9,15 +9,17 @@ const makeSut = () => {
   }
 }
 
-describe('Create Task', () => {
-  test('should return 400 if no task is provided', async () => {
+describe('Create Task Router', () => {
+  test('should return 400 if no description is provided', async () => {
     const { sut } = makeSut()
     const httpRequest = {
       body: {}
     }
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(400)
-    expect(httpResponse.body.error).toEqual(new MissingParamError('task'))
+    expect(httpResponse.body.error).toEqual(
+      new MissingParamError('description')
+    )
   })
   test('should return 500 if no httpRequest is provided', async () => {
     const { sut } = makeSut()

@@ -4,10 +4,10 @@ const { MissingParamError } = require('../../utils/errors')
 module.exports = class CreateTaskRouter {
   async route (httpRequest) {
     try {
-      const { task } = httpRequest.body
+      const { description } = httpRequest.body
 
-      if (!task) {
-        return HttpResponse.badRequest(new MissingParamError('task'))
+      if (!description) {
+        return HttpResponse.badRequest(new MissingParamError('description'))
       }
     } catch (error) {
       return HttpResponse.serverError()
