@@ -1,25 +1,7 @@
-const { MongoClient } = require('mongodb')
-const { mongoUrl } = require('../config/database')
-const InvalidParamError = require('../../utils/errors/invalid-param-error')
+const TaskRepository = require('./task-repository')
 const TaskEntity = require('../../domain/entities/task-entity')
-const TaskAdapter = require('../../adapters/task-adapter')
-
-let connection
-let db
-
-class TaskRepository {
-  async create ({ description, is_checked = false }) {
-    if (!description) throw new InvalidParamError('description')
-    const taskDocument = (
-      await db.collection('tasks').insertOne({ description, is_checked })
-    ).ops[0]
-    return TaskAdapter.adapt({
-      id: taskDocument._id,
-      description: taskDocument.description,
-      isChecked: taskDocument.is_checked
-    })
-  }
-}
+const MongoDB = require('../helpers/mongo-db')
+const InvalidParamError = require('../../utils/errors/invalid-param-error')
 
 const makeSut = () => {
   return {
@@ -28,15 +10,13 @@ const makeSut = () => {
 }
 
 describe('Task Respository', () => {
+  let db
   beforeAll(async () => {
-    connection = await MongoClient.connect(mongoUrl, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
-    db = await connection.db()
+    await MongoDB.connect()
+    db = await MongoDB.client.db()
   })
   afterAll(async () => {
-    await connection.close()
+    await MongoDB.disconnect()
   })
   test('should throw error if a description is invalid or no provided in method create', () => {
     const { sut } = makeSut()
