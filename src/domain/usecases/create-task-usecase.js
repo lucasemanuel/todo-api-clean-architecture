@@ -6,7 +6,7 @@ class CreateTaskUseCase {
   }
 
   taskRepositoryIsValid () {
-    if (!this.taskRepository || !this.taskRepository.insert) {
+    if (!this.taskRepository || !this.taskRepository.create) {
       throw new InvalidParamError('taskRepository')
     }
   }
@@ -14,7 +14,7 @@ class CreateTaskUseCase {
   async execute ({ description } = {}) {
     if (!description) throw new MissingParamError('description')
     this.taskRepositoryIsValid()
-    const task = await this.taskRepository.insert({ description })
+    const task = await this.taskRepository.create({ description })
     return task
   }
 }

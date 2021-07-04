@@ -3,7 +3,7 @@ const { MissingParamError, InvalidParamError } = require('../../utils/errors')
 
 const makeTaskRepositorySpy = () => {
   class TaskRepositorySpy {
-    async insert ({ description }) {
+    async create ({ description }) {
       this.description = description
       return {
         description
@@ -15,7 +15,7 @@ const makeTaskRepositorySpy = () => {
 
 const makeTaskRepositoryWithErrorSpy = () => {
   class TaskRepositoryWithErrorSpy {
-    async insert () {
+    async create () {
       throw new Error()
     }
   }
@@ -47,7 +47,7 @@ describe('Check Task Use Case', () => {
       expect(promise).rejects.toThrow(new InvalidParamError('taskRepository'))
     }
   })
-  test('should throw if TaskRepository insert method throw error', () => {
+  test('should throw if TaskRepository create method throw error', () => {
     const taskRepositoryWithErrorSpy = makeTaskRepositoryWithErrorSpy()
     const sut = new CreateTaskUseCase({
       taskRepository: taskRepositoryWithErrorSpy
