@@ -1,9 +1,9 @@
 const { MongoClient } = require('mongodb')
-const { mongoUrl } = require('../config/database')
+const { mongoUri } = require('../config/env')
 
 module.exports = {
   async connect () {
-    this.client = await MongoClient.connect(mongoUrl, {
+    this.client = await MongoClient.connect(mongoUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true
     })
