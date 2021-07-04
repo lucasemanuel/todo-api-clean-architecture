@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "nodemon index.js",
     "test": "jest --watch",
-    "test:staged": "jest --runInBand",
+    "test:staged": "jest --runInBand --passWithNoTests",
     "test:unit": "jest --watch -c jest-unit.config.js",
     "test:integration": "jest --watchAll -c jest-integration.config.js"
   },
