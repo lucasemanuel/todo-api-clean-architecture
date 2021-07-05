@@ -9,7 +9,7 @@ describe('Task Routes', () => {
   afterAll(async () => {
     await MongoDB.disconnect()
   })
-  test('should method get return 201 when is provided correct params', async () => {
+  test('should method post return 201 when is provided correct params', async () => {
     await request(app)
       .post('/api/tasks')
       .send({
