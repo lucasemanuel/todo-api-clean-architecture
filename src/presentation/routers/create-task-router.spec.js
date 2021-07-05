@@ -12,13 +12,13 @@ class CreateTaskUseCaseSpy {
   }
 }
 
-const makeCreateTaskUseCaseWithError = () => {
-  class CreateTaskUseCaseWithError {
+const makeCreateTaskUseCaseWithErrorSpy = () => {
+  class CreateTaskUseCaseWithErrorSpy {
     async execute () {
       throw new Error()
     }
   }
-  return new CreateTaskUseCaseWithError()
+  return new CreateTaskUseCaseWithErrorSpy()
 }
 
 const makeSut = () => {
@@ -68,9 +68,9 @@ describe('Create Task Router', () => {
     expect(createTaskUseCaseSpy.isChecked).toBe(httpRequest.body.isChecked)
   })
   test('should return 500 if CreateTaskUseCase throws error', async () => {
-    const createTaskUseCaseWithError = makeCreateTaskUseCaseWithError()
+    const createTaskUseCaseWithErrorSpy = makeCreateTaskUseCaseWithErrorSpy()
     const sut = new CreateTaskRouter({
-      createTaskUseCase: createTaskUseCaseWithError
+      createTaskUseCase: createTaskUseCaseWithErrorSpy
     })
     const httpRequest = {
       body: {
