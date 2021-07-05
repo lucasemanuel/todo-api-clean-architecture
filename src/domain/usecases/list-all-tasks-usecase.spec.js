@@ -34,6 +34,16 @@ const makeTaskRepositorySpy = () => {
   return new TaskRepositorySpy()
 }
 
+const makeTaskRepositoryWithErrorSpy = () => {
+  class TaskRepositoryWithErrorSpy {
+    async findAll () {
+      throw new Error()
+    }
+  }
+
+  return new TaskRepositoryWithErrorSpy()
+}
+
 const makeSut = () => {
   const taskRepositorySpy = makeTaskRepositorySpy()
   const sut = new ListAllTasksUseCase({
@@ -66,5 +76,13 @@ describe('List All Tasks Use Case', () => {
       new TaskEntity({ description: 'any description 1' }),
       new TaskEntity({ description: 'any description 2' })
     ])
+  })
+  test('should throw if TaskRepository findAll method throw error', () => {
+    const taskRepositoryWithErrorSpy = makeTaskRepositoryWithErrorSpy()
+    const sut = new ListAllTasksUseCase({
+      taskRepository: taskRepositoryWithErrorSpy
+    })
+    const promise = sut.execute()
+    expect(promise).rejects.toThrow()
   })
 })
