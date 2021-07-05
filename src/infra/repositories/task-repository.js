@@ -16,6 +16,24 @@ class TaskRepository {
       isChecked: taskDocument.ops[0].is_checked
     })
   }
+
+  async findAll () {
+    const taskList = await MongoDB.client
+      .db()
+      .collection('tasks')
+      .find()
+      .toArray()
+
+    taskList.map(document => {
+      return TaskAdapter.adapt({
+        id: document._id,
+        description: document.description,
+        isChecked: document.is_checked
+      })
+    })
+
+    return taskList
+  }
 }
 
 module.exports = TaskRepository

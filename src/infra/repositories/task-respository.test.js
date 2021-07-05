@@ -15,6 +15,9 @@ describe('Task Respository', () => {
     await MongoDB.connect()
     db = await MongoDB.client.db()
   })
+  beforeEach(async () => {
+    db.collection('tasks').deleteMany()
+  })
   afterAll(async () => {
     await db.collection('tasks').deleteMany()
     await MongoDB.disconnect()
@@ -38,5 +41,17 @@ describe('Task Respository', () => {
     expect(task).toEqual(
       new TaskEntity({ description: 'any description', id: task.id })
     )
+  })
+  test('should return task list by findAll method', async () => {
+    const { sut } = makeSut()
+    await db.collection('tasks').insertMany([
+      { description: 'any description', is_checked: false },
+      { description: 'any description', is_checked: false },
+      { description: 'any description', is_checked: false },
+      { description: 'any description', is_checked: false },
+      { description: 'any description', is_checked: false }
+    ])
+    const tasklist = await sut.findAll()
+    expect(tasklist.length).toBe(5)
   })
 })
