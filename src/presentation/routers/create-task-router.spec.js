@@ -14,7 +14,7 @@ class CreateTaskUseCaseSpy {
 
 const makeCreateTaskUseCaseWithError = () => {
   class CreateTaskUseCaseWithError {
-    async execute ({ description, isChecked }) {
+    async execute () {
       throw new Error()
     }
   }
@@ -38,22 +38,22 @@ describe('Create Task Router', () => {
     }
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(400)
-    expect(httpResponse.body.error).toEqual(
-      new MissingParamError('description')
+    expect(httpResponse.body.error).toBe(
+      new MissingParamError('description').message
     )
   })
   test('should return 500 if no httpRequest is provided', async () => {
     const { sut } = makeSut()
     const httpResponse = await sut.route()
     expect(httpResponse.statusCode).toBe(500)
-    expect(httpResponse.body.error).toEqual(new ServerError())
+    expect(httpResponse.body.error).toBe(new ServerError().message)
   })
   test('should return 500 if no body is provided', async () => {
     const { sut } = makeSut()
     const httpRequest = {}
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(500)
-    expect(httpResponse.body.error).toEqual(new ServerError())
+    expect(httpResponse.body.error).toBe(new ServerError().message)
   })
   test('should call CreateTaskUseCase with correct params', async () => {
     const { sut, createTaskUseCaseSpy } = makeSut()
@@ -80,7 +80,7 @@ describe('Create Task Router', () => {
     }
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(500)
-    expect(httpResponse.body.error).toEqual(new ServerError())
+    expect(httpResponse.body.error).toBe(new ServerError().message)
   })
   test('should return 201 if is provided correct params', async () => {
     const { sut } = makeSut()

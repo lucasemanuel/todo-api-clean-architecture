@@ -5,7 +5,7 @@ module.exports = class HttpResponse {
     return {
       statusCode: 400,
       body: {
-        error
+        error: error.message
       }
     }
   }
@@ -14,7 +14,7 @@ module.exports = class HttpResponse {
     return {
       statusCode: 500,
       body: {
-        error: new ServerError()
+        error: new ServerError().message
       }
     }
   }
