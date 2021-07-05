@@ -1,15 +1,47 @@
+const { ServerError } = require('../errors')
+const HttpResponse = require('../helpers/http-response')
+
 class ListTaskRouter {
+  constructor ({ listAllTaskUseCase } = {}) {
+    this.listAllTaskUseCase = listAllTaskUseCase
+  }
+
   async route () {
-    return {
-      statusCode: 200
+    try {
+      const tasklist = await this.listAllTaskUseCase.execute()
+
+      return {
+        statusCode: 200,
+        body: tasklist
+      }
+    } catch (error) {
+      return HttpResponse.serverError()
     }
   }
 }
 
+const makeListAllTaskUseCaseSpy = () => {
+  class ListAllTaskUseCaseSpy {
+    async execute () {}
+  }
+  return new ListAllTaskUseCaseSpy()
+}
+
+const makeListAllTaskUseCaseWithErrorSpy = () => {
+  class ListAllTaskUseCaseWithErrorSpy {
+    async execute () {
+      throw new Error()
+    }
+  }
+  return new ListAllTaskUseCaseWithErrorSpy()
+}
+
 const makeSut = () => {
-  const sut = new ListTaskRouter()
+  const listAllTaskUseCaseSpy = makeListAllTaskUseCaseSpy()
+  const sut = new ListTaskRouter({ listAllTaskUseCase: listAllTaskUseCaseSpy })
   return {
-    sut
+    sut,
+    listAllTaskUseCaseSpy
   }
 }
 
@@ -18,5 +50,15 @@ describe('List Task Router', () => {
     const { sut } = makeSut()
     const httpResponse = await sut.route()
     expect(httpResponse.statusCode).toBe(200)
+  })
+  test.todo('should return task list')
+  test('should return 500 if ListAllTaskUseCase throws error', async () => {
+    const ListAllTaskUseCaseWithErrorSpy = makeListAllTaskUseCaseWithErrorSpy()
+    const sut = new ListTaskRouter({
+      listAllTaskUseCase: ListAllTaskUseCaseWithErrorSpy
+    })
+    const httpResponse = await sut.route()
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body.error).toBe(new ServerError().message)
   })
 })
