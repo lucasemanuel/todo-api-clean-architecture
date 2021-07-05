@@ -16,10 +16,9 @@ describe('Task Respository', () => {
     db = await MongoDB.client.db()
   })
   beforeEach(async () => {
-    db.collection('tasks').deleteMany()
+    await db.collection('tasks').deleteMany()
   })
   afterAll(async () => {
-    await db.collection('tasks').deleteMany()
     await MongoDB.disconnect()
   })
   test('should throw error if a description is invalid or no provided in method create', () => {
