@@ -1,24 +1,6 @@
+const ListAllTasksUseCase = require('./list-all-tasks-usecase')
 const TaskEntity = require('../entities/task-entity')
 const { InvalidParamError } = require('../../utils/errors')
-
-class ListAllTasksUseCase {
-  constructor ({ taskRepository } = {}) {
-    this.taskRepository = taskRepository
-  }
-
-  taskRepositoryIsValid () {
-    if (!this.taskRepository || !this.taskRepository.findAll) {
-      throw new InvalidParamError('taskRepository')
-    }
-    return true
-  }
-
-  async execute () {
-    this.taskRepositoryIsValid()
-    const taskList = await this.taskRepository.findAll()
-    return taskList
-  }
-}
 
 const makeTaskRepositorySpy = () => {
   class TaskRepositorySpy {
