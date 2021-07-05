@@ -54,4 +54,16 @@ describe('Task Respository', () => {
     const tasklist = await sut.findAll()
     expect(tasklist.length).toBe(5)
   })
+  test('should return list with TaskEntities', async () => {
+    const { sut } = makeSut()
+    await db.collection('tasks').insertMany([
+      { description: 'any description', is_checked: false },
+      { description: 'any description', is_checked: false },
+      { description: 'any description', is_checked: false }
+    ])
+    const taskList = await sut.findAll()
+    for (const task of taskList) {
+      expect(task).toBeInstanceOf(TaskEntity)
+    }
+  })
 })

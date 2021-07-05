@@ -18,13 +18,13 @@ class TaskRepository {
   }
 
   async findAll () {
-    const taskList = await MongoDB.client
+    let taskList = await MongoDB.client
       .db()
       .collection('tasks')
       .find()
       .toArray()
 
-    taskList.map(document => {
+    taskList = taskList.map(document => {
       return TaskAdapter.adapt({
         id: document._id,
         description: document.description,
