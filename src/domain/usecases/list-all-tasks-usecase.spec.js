@@ -1,3 +1,4 @@
+const TaskEntity = require('../entities/task-entity')
 const { InvalidParamError } = require('../../utils/errors')
 
 class ListAllTasksUseCase {
@@ -14,6 +15,34 @@ class ListAllTasksUseCase {
 
   async execute () {
     this.taskRepositoryIsValid()
+    const taskList = await this.taskRepository.findAll()
+    return taskList
+  }
+}
+
+const makeTaskRepositorySpy = () => {
+  class TaskRepositorySpy {
+    async findAll () {
+      return Promise.resolve([
+        new TaskEntity({ description: 'any description 0' }),
+        new TaskEntity({ description: 'any description 1' }),
+        new TaskEntity({ description: 'any description 2' })
+      ])
+    }
+  }
+
+  return new TaskRepositorySpy()
+}
+
+const makeSut = () => {
+  const taskRepositorySpy = makeTaskRepositorySpy()
+  const sut = new ListAllTasksUseCase({
+    taskRepository: taskRepositorySpy
+  })
+
+  return {
+    sut,
+    taskRepositorySpy
   }
 }
 
@@ -28,5 +57,14 @@ describe('List All Tasks Use Case', () => {
       const promise = sut.execute()
       expect(promise).rejects.toThrow(new InvalidParamError('taskRepository'))
     }
+  })
+  test('should return the task List', async () => {
+    const { sut } = makeSut()
+    const taskList = await sut.execute()
+    expect(taskList).toEqual([
+      new TaskEntity({ description: 'any description 0' }),
+      new TaskEntity({ description: 'any description 1' }),
+      new TaskEntity({ description: 'any description 2' })
+    ])
   })
 })
