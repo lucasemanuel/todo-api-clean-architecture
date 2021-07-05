@@ -22,7 +22,13 @@ class ListTaskRouter {
 
 const makeListAllTaskUseCaseSpy = () => {
   class ListAllTaskUseCaseSpy {
-    async execute () {}
+    constructor () {
+      this.tasklist = []
+    }
+
+    async execute () {
+      return this.tasklist
+    }
   }
   return new ListAllTaskUseCaseSpy()
 }
@@ -51,7 +57,31 @@ describe('List Task Router', () => {
     const httpResponse = await sut.route()
     expect(httpResponse.statusCode).toBe(200)
   })
-  test.todo('should return task list')
+  test('should return task list', async () => {
+    const listAllTaskUseCaseSpy = makeListAllTaskUseCaseSpy()
+    const sut = new ListTaskRouter({
+      listAllTaskUseCase: listAllTaskUseCaseSpy
+    })
+    listAllTaskUseCaseSpy.tasklist = [
+      {
+        id: '1',
+        description: 'any description',
+        isChecked: false
+      },
+      {
+        id: '2',
+        description: 'any description',
+        isChecked: false
+      }
+    ]
+    const httpResponse = await sut.route()
+    expect(httpResponse.body.length).toBe(2)
+    for (const task of httpResponse.body) {
+      expect(task.id).not.toBeUndefined()
+      expect(task.description).not.toBeUndefined()
+      expect(task.isChecked).not.toBeUndefined()
+    }
+  })
   test('should return 500 if ListAllTaskUseCase throws error', async () => {
     const ListAllTaskUseCaseWithErrorSpy = makeListAllTaskUseCaseWithErrorSpy()
     const sut = new ListTaskRouter({
