@@ -3,8 +3,13 @@ const MongoDB = require('../../helpers/mongo-db')
 const app = require('../app')
 
 describe('Task Routes', () => {
+  let db
   beforeAll(async () => {
     await MongoDB.connect()
+    db = await MongoDB.client.db()
+  })
+  beforeEach(async () => {
+    await db.collection('tasks').deleteMany()
   })
   afterAll(async () => {
     await MongoDB.disconnect()
@@ -16,5 +21,19 @@ describe('Task Routes', () => {
         description: 'any description'
       })
       .expect(201)
+  })
+  test('should method get return 200', async () => {
+    await request(app)
+      .get('/api/tasks')
+      .expect(200)
+  })
+  test('should method get return in response body a task list', async () => {
+    await db.collection('tasks').insertMany([
+      { description: 'any description', is_checked: false },
+      { description: 'any description', is_checked: false },
+      { description: 'any description', is_checked: false }
+    ])
+    const response = await request(app).get('/api/tasks')
+    expect(response.body).toHaveLength(3)
   })
 })
