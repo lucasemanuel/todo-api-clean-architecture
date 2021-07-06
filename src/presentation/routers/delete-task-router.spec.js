@@ -18,6 +18,16 @@ class DeleteTaskRouter {
   }
 }
 
+const makeDeleteTaskUseCaseWithErrorSpy = () => {
+  class DeleteTaskUseCaseWithErrorSpy {
+    async execute () {
+      throw new Error()
+    }
+  }
+
+  return new DeleteTaskUseCaseWithErrorSpy()
+}
+
 const makeDeleteTaskUseCaseSpy = () => {
   class DeleteTaskUseCaseSpy {
     async execute (id) {
@@ -72,5 +82,18 @@ describe('Delete task Router', () => {
     await sut.route(httpRequest)
     expect(deleteTaskUseCaseSpy.id).toBe('any id')
   })
-  test.todo('should throw error if DeleteTaskUseCase throws')
+  test('should return 500 if DeleteTaskUseCase throw error', async () => {
+    const deleteTaskUseCaseWithErrorSpy = makeDeleteTaskUseCaseWithErrorSpy()
+    const sut = new DeleteTaskRouter({
+      deleteTaskUseCase: deleteTaskUseCaseWithErrorSpy
+    })
+    const httpRequest = {
+      body: {
+        id: 'any id'
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body.error).toBe(new ServerError().message)
+  })
 })
