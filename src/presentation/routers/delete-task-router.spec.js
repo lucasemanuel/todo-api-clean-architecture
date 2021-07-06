@@ -3,20 +3,36 @@ const { MissingParamError } = require('../../utils/errors')
 const { ServerError } = require('../errors')
 
 class DeleteTaskRouter {
+  constructor ({ deleteTaskUseCase }) {
+    this.deleteTaskUseCase = deleteTaskUseCase
+  }
+
   async route (httpRequest) {
     try {
       const { id } = httpRequest.body
       if (!id) return HttpResponse.badRequest(new MissingParamError('id'))
+      await this.deleteTaskUseCase.execute(id)
     } catch (error) {
       return HttpResponse.serverError()
     }
   }
 }
 
+const makeDeleteTaskUseCaseSpy = () => {
+  class DeleteTaskUseCaseSpy {
+    async execute (id) {
+      this.id = id
+    }
+  }
+  return new DeleteTaskUseCaseSpy()
+}
+
 const makeSut = () => {
-  const sut = new DeleteTaskRouter()
+  const deleteTaskUseCaseSpy = makeDeleteTaskUseCaseSpy()
+  const sut = new DeleteTaskRouter({ deleteTaskUseCase: deleteTaskUseCaseSpy })
   return {
-    sut
+    sut,
+    deleteTaskUseCaseSpy
   }
 }
 
@@ -43,4 +59,18 @@ describe('Delete task Router', () => {
     expect(httpResponse.statusCode).toBe(400)
     expect(httpResponse.body.error).toBe(new MissingParamError('id').message)
   })
+  test('should call DeleteTaskUseCase with correct params', async () => {
+    const { deleteTaskUseCaseSpy } = makeSut()
+    const sut = new DeleteTaskRouter({
+      deleteTaskUseCase: deleteTaskUseCaseSpy
+    })
+    const httpRequest = {
+      body: {
+        id: 'any id'
+      }
+    }
+    await sut.route(httpRequest)
+    expect(deleteTaskUseCaseSpy.id).toBe('any id')
+  })
+  test.todo('should throw error if DeleteTaskUseCase throws')
 })
