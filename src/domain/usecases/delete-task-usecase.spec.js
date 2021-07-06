@@ -1,31 +1,6 @@
+const DeleteTaskUseCase = require('../usecases/delete-task-usecase')
 const TaskEntity = require('../entities/task-entity')
 const { MissingParamError, InvalidParamError } = require('../../utils/errors')
-
-class DeleteTaskUseCase {
-  constructor ({ taskRepository } = {}) {
-    this.taskRepository = taskRepository
-  }
-
-  async execute (id) {
-    this.taskRepositoryIsValid()
-    if (!id) throw new MissingParamError('id')
-    const task = await this.taskRepository.findById(id)
-    if (task instanceof TaskEntity) {
-      await this.taskRepository.delete(id)
-      return true
-    }
-  }
-
-  taskRepositoryIsValid () {
-    if (
-      !this.taskRepository ||
-      !this.taskRepository.delete ||
-      !this.taskRepository.findById
-    ) {
-      throw new InvalidParamError('taskRepository')
-    }
-  }
-}
 
 const makeTaskRepositoryWithErrorSpy = () => {
   class TaskRepositoryWithErrorFindByIdMethodSpy {
