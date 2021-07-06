@@ -1,3 +1,4 @@
+const TaskEntity = require('../entities/task-entity')
 const { MissingParamError, InvalidParamError } = require('../../utils/errors')
 
 class DeleteTaskUseCase {
@@ -8,8 +9,11 @@ class DeleteTaskUseCase {
   async execute (id) {
     this.taskRepositoryIsValid()
     if (!id) throw new MissingParamError('id')
-    await this.taskRepository.findById(id)
-    await this.taskRepository.delete(id)
+    const task = await this.taskRepository.findById(id)
+    if (task instanceof TaskEntity) {
+      await this.taskRepository.delete(id)
+      return true
+    }
   }
 
   taskRepositoryIsValid () {
@@ -33,7 +37,11 @@ const makeTaskRepositoryWithErrorSpy = () => {
   }
 
   class TaskRepositoryWithErrorDeleteMethodSpy {
-    async findById () {}
+    async findById () {
+      return new TaskEntity({
+        description: 'any description'
+      })
+    }
 
     async delete () {
       throw new Error()
@@ -50,6 +58,9 @@ const makeTaskRepositorySpy = () => {
   class TaskRepositorySpy {
     async findById (id) {
       this.id = id
+      return new TaskEntity({
+        description: 'any description'
+      })
     }
 
     async delete (id) {
@@ -112,5 +123,10 @@ describe('Delete Task Use Case', () => {
     const sut = new DeleteTaskUseCase({ taskRepository: taskRepositorySpy })
     await sut.execute('any id')
     expect(taskRepositorySpy.id).toBe('any id')
+  })
+  test('should delete if the task is found', async () => {
+    const { sut } = makeSut()
+    const result = await sut.execute('any id')
+    expect(result).toBe(true)
   })
 })
