@@ -1,15 +1,22 @@
 const { MissingParamError, InvalidParamError } = require('../../utils/errors')
 
 class DeleteTaskUseCase {
-  async execute () {
-    throw new MissingParamError('id')
+  constructor ({ taskRepository } = {}) {
+    this.taskRepository = taskRepository
+  }
+
+  async execute (id) {
+    this.taskRepositoryIsValid()
+    if (!id) throw new MissingParamError('id')
+    await this.taskRepository.findById(id)
+    await this.taskRepository.delete(id)
   }
 
   taskRepositoryIsValid () {
     if (
       !this.taskRepository ||
       !this.taskRepository.delete ||
-      this.taskRepository.findById
+      !this.taskRepository.findById
     ) {
       throw new InvalidParamError('taskRepository')
     }
@@ -39,8 +46,25 @@ const makeTaskRepositoryWithErrorSpy = () => {
   }
 }
 
+const makeTaskRepositorySpy = () => {
+  class TaskRepositorySpy {
+    async findById (id) {
+      this.id = id
+    }
+
+    async delete (id) {
+      this.id = id
+    }
+  }
+
+  return new TaskRepositorySpy()
+}
+
 const makeSut = () => {
-  const sut = new DeleteTaskUseCase()
+  const taskRepositorySpy = makeTaskRepositorySpy()
+  const sut = new DeleteTaskUseCase({
+    taskRepository: taskRepositorySpy
+  })
   return {
     sut
   }
@@ -61,6 +85,7 @@ describe('Delete Task Use Case', () => {
     for (const sut of suts) {
       expect(() => {
         sut.taskRepositoryIsValid()
+        sut.execute('any id')
       }).toThrow(new InvalidParamError('taskRepository'))
     }
   })
@@ -81,5 +106,11 @@ describe('Delete Task Use Case', () => {
       const promise = sut.execute('any id')
       expect(promise).rejects.toThrow()
     }
+  })
+  test('should call TaskRepository with correct id', async () => {
+    const taskRepositorySpy = makeTaskRepositorySpy()
+    const sut = new DeleteTaskUseCase({ taskRepository: taskRepositorySpy })
+    await sut.execute('any id')
+    expect(taskRepositorySpy.id).toBe('any id')
   })
 })
