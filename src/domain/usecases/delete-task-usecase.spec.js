@@ -6,9 +6,36 @@ class DeleteTaskUseCase {
   }
 
   taskRepositoryIsValid () {
-    if (!this.taskRepository || !this.taskRepository.delete) {
+    if (
+      !this.taskRepository ||
+      !this.taskRepository.delete ||
+      this.taskRepository.findById
+    ) {
       throw new InvalidParamError('taskRepository')
     }
+  }
+}
+
+const makeTaskRepositoryWithErrorSpy = () => {
+  class TaskRepositoryWithErrorFindByIdMethodSpy {
+    async findById () {
+      throw new Error()
+    }
+
+    async delete () {}
+  }
+
+  class TaskRepositoryWithErrorDeleteMethodSpy {
+    async findById () {}
+
+    async delete () {
+      throw new Error()
+    }
+  }
+
+  return {
+    taskRepositoryWithErrorFindByIdMethodSpy: new TaskRepositoryWithErrorFindByIdMethodSpy(),
+    taskRepositoryWithErrorDeleteMethodSpy: new TaskRepositoryWithErrorDeleteMethodSpy()
   }
 }
 
@@ -35,6 +62,24 @@ describe('Delete Task Use Case', () => {
       expect(() => {
         sut.taskRepositoryIsValid()
       }).toThrow(new InvalidParamError('taskRepository'))
+    }
+  })
+  test('should throw error if TaskRepository throws', async () => {
+    const {
+      taskRepositoryWithErrorFindByIdMethodSpy,
+      taskRepositoryWithErrorDeleteMethodSpy
+    } = makeTaskRepositoryWithErrorSpy()
+    const suts = [
+      new DeleteTaskUseCase({
+        taskRepository: taskRepositoryWithErrorFindByIdMethodSpy
+      }),
+      new DeleteTaskUseCase({
+        taskRepository: taskRepositoryWithErrorDeleteMethodSpy
+      })
+    ]
+    for (const sut of suts) {
+      const promise = sut.execute('any id')
+      expect(promise).rejects.toThrow()
     }
   })
 })
