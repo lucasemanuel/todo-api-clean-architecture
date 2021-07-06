@@ -12,6 +12,9 @@ class DeleteTaskRouter {
       const { id } = httpRequest.body
       if (!id) return HttpResponse.badRequest(new MissingParamError('id'))
       await this.deleteTaskUseCase.execute(id)
+      return {
+        statusCode: 204
+      }
     } catch (error) {
       return HttpResponse.serverError()
     }
@@ -95,5 +98,15 @@ describe('Delete task Router', () => {
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(500)
     expect(httpResponse.body.error).toBe(new ServerError().message)
+  })
+  test('should return 204 after delete task', async () => {
+    const { sut } = makeSut()
+    const httpRequest = {
+      body: {
+        id: 'any id'
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(204)
   })
 })
