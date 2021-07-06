@@ -65,4 +65,15 @@ describe('Task Respository', () => {
       expect(task).toBeInstanceOf(TaskEntity)
     }
   })
+  test.todo('should throw error if id is no provided')
+  test('should return task by id', async () => {
+    const { sut } = makeSut()
+    await db.collection('tasks').insertOne({
+      _id: 'any_id',
+      description: 'any description',
+      is_checked: true
+    })
+    const task = await sut.findById('any_id')
+    expect(task).toBeInstanceOf(TaskEntity)
+  })
 })

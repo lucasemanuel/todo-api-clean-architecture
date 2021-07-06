@@ -34,6 +34,19 @@ class TaskRepository {
 
     return taskList
   }
+
+  async findById (id) {
+    const taskDocument = await MongoDB.client
+      .db()
+      .collection('tasks')
+      .findOne({ _id: 'any_id' })
+
+    return TaskAdapter.adapt({
+      id: taskDocument._id,
+      description: taskDocument.description,
+      isChecked: taskDocument.is_checked
+    })
+  }
 }
 
 module.exports = TaskRepository
