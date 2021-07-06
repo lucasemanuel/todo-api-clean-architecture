@@ -1,9 +1,15 @@
-const { ServerError } = require('../errors')
 const HttpResponse = require('../helpers/http-response')
+const { MissingParamError } = require('../../utils/errors')
+const { ServerError } = require('../errors')
 
 class DeleteTaskRouter {
   async route (httpRequest) {
-    return HttpResponse.serverError()
+    try {
+      const { id } = httpRequest.body
+      if (!id) return HttpResponse.badRequest(new MissingParamError('id'))
+    } catch (error) {
+      return HttpResponse.serverError()
+    }
   }
 }
 
@@ -27,5 +33,14 @@ describe('Delete task Router', () => {
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(500)
     expect(httpResponse.body.error).toBe(new ServerError().message)
+  })
+  test('should return 400 if no id is provided', async () => {
+    const { sut } = makeSut()
+    const httpRequest = {
+      body: {}
+    }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(400)
+    expect(httpResponse.body.error).toBe(new MissingParamError('id').message)
   })
 })
