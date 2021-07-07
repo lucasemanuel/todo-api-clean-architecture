@@ -1,7 +1,7 @@
 const TaskRepository = require('./task-repository')
 const TaskEntity = require('../../domain/entities/task-entity')
 const MongoDB = require('../helpers/mongo-db')
-const InvalidParamError = require('../../utils/errors/invalid-param-error')
+const { InvalidParamError, MissingParamError } = require('../../utils/errors')
 
 const makeSut = () => {
   return {
@@ -65,7 +65,11 @@ describe('Task Respository', () => {
       expect(task).toBeInstanceOf(TaskEntity)
     }
   })
-  test.todo('should throw error if id is no provided')
+  test('should throw error if id is no provided in findById', async () => {
+    const { sut } = makeSut()
+    const promise = sut.findById()
+    expect(promise).rejects.toThrow(new MissingParamError('id'))
+  })
   test('should return task by id', async () => {
     const { sut } = makeSut()
     await db.collection('tasks').insertOne({
@@ -76,4 +80,6 @@ describe('Task Respository', () => {
     const task = await sut.findById('any_id')
     expect(task).toBeInstanceOf(TaskEntity)
   })
+  test.todo('should throw error if task is not found when delete')
+  test.todo('should return null if not found task')
 })

@@ -1,5 +1,5 @@
 const TaskAdapter = require('../../adapters/task-adapter')
-const InvalidParamError = require('../../utils/errors/invalid-param-error')
+const { InvalidParamError, MissingParamError } = require('../../utils/errors')
 const MongoDB = require('../helpers/mongo-db')
 
 class TaskRepository {
@@ -36,10 +36,11 @@ class TaskRepository {
   }
 
   async findById (id) {
+    if (!id) throw new MissingParamError('id')
     const taskDocument = await MongoDB.client
       .db()
       .collection('tasks')
-      .findOne({ _id: 'any_id' })
+      .findOne({ _id: id })
 
     return TaskAdapter.adapt({
       id: taskDocument._id,
