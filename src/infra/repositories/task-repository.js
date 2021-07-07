@@ -53,6 +53,7 @@ class TaskRepository {
 
   async delete (id) {
     if (!id) throw new MissingParamError('id')
+    return null
   }
 }
 
