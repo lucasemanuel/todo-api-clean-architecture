@@ -65,7 +65,7 @@ describe('Task Respository', () => {
       expect(task).toBeInstanceOf(TaskEntity)
     }
   })
-  test('should throw error if id is no provided in findById', async () => {
+  test('should throw error if id is no provided in findById', () => {
     const { sut } = makeSut()
     const promise = sut.findById()
     expect(promise).rejects.toThrow(new MissingParamError('id'))
@@ -80,6 +80,10 @@ describe('Task Respository', () => {
     const task = await sut.findById('any_id')
     expect(task).toBeInstanceOf(TaskEntity)
   })
-  test.todo('should throw error if task is not found when delete')
-  test.todo('should return null if not found task')
+  test('should return null if task not found in findById', async () => {
+    const { sut } = makeSut()
+    const task = await sut.findById('any_id')
+    expect(task).toBeNull()
+  })
+  test.todo('should return null if task not found in delete')
 })

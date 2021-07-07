@@ -42,11 +42,14 @@ class TaskRepository {
       .collection('tasks')
       .findOne({ _id: id })
 
-    return TaskAdapter.adapt({
-      id: taskDocument._id,
-      description: taskDocument.description,
-      isChecked: taskDocument.is_checked
-    })
+    const task = taskDocument
+      ? TaskAdapter.adapt({
+          id: taskDocument._id,
+          description: taskDocument.description,
+          isChecked: taskDocument.is_checked
+        })
+      : null
+    return task
   }
 }
 
