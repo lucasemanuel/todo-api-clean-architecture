@@ -14,7 +14,7 @@ describe('Task Routes', () => {
   afterAll(async () => {
     await MongoDB.disconnect()
   })
-  test('should method post return 201 when is provided correct params', async () => {
+  test('should return 201 after create task - [Http verb: Post]', async () => {
     await request(app)
       .post('/api/tasks')
       .send({
@@ -22,12 +22,7 @@ describe('Task Routes', () => {
       })
       .expect(201)
   })
-  test('should method get return 200', async () => {
-    await request(app)
-      .get('/api/tasks')
-      .expect(200)
-  })
-  test('should method get return in response body a task list', async () => {
+  test('should return 200 and a task list - [Http verb: Get]', async () => {
     await db.collection('tasks').insertMany([
       { description: 'any description', is_checked: false },
       { description: 'any description', is_checked: false },
@@ -35,13 +30,16 @@ describe('Task Routes', () => {
     ])
     const response = await request(app).get('/api/tasks')
     expect(response.body).toHaveLength(3)
+    await request(app)
+      .get('/api/tasks')
+      .expect(200)
   })
-  test('should return 404 if task is not found - /api/tasks/:id [Delete]', async () => {
+  test('should return 404 if task is not found - [Http verb: Delete]', async () => {
     await request(app)
       .delete('/api/tasks/any_id')
       .expect(404)
   })
-  test('should return 204 if task deleted - /api/tasks/:id [Delete]', async () => {
+  test('should return 204 if task deleted - [Http verb: Delete]', async () => {
     await db
       .collection('tasks')
       .insertOne({ _id: 'any_id', description: 'any description' })
