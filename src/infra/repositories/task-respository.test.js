@@ -95,5 +95,21 @@ describe('Task Respository', () => {
     const task = await sut.delete('any_id')
     expect(task).toBeNull()
   })
-  test.todo('should return true if document is deleted')
+  test('should return true if task is deleted', async () => {
+    const { sut } = makeSut()
+    await db.collection('tasks').insertOne({
+      _id: 'any_id',
+      description: 'any description',
+      is_checked: true
+    })
+
+    const isDeleted = await sut.delete('any_id')
+    const task = await MongoDB.client
+      .db()
+      .collection('tasks')
+      .findOne({ _id: 'any_id' })
+
+    expect(task).toBeNull()
+    expect(isDeleted).toBeTruthy()
+  })
 })

@@ -53,7 +53,12 @@ class TaskRepository {
 
   async delete (id) {
     if (!id) throw new MissingParamError('id')
-    return null
+    const result = await MongoDB.client
+      .db()
+      .collection('tasks')
+      .deleteOne({ _id: id })
+
+    return result.deletedCount ? true : null
   }
 }
 
