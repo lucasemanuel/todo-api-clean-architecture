@@ -12,10 +12,21 @@ const makeDeleteTaskUseCaseWithErrorSpy = () => {
   return new DeleteTaskUseCaseWithErrorSpy()
 }
 
+const makeDeleteTaskUseCaseReturnNullSpy = () => {
+  class DeleteTaskUseCaseReturnNullSpy {
+    async execute (id) {
+      this.id = id
+      return null
+    }
+  }
+  return new DeleteTaskUseCaseReturnNullSpy()
+}
+
 const makeDeleteTaskUseCaseSpy = () => {
   class DeleteTaskUseCaseSpy {
     async execute (id) {
       this.id = id
+      return true
     }
   }
   return new DeleteTaskUseCaseSpy()
@@ -80,7 +91,7 @@ describe('Delete task Router', () => {
     expect(httpResponse.statusCode).toBe(500)
     expect(httpResponse.body.error).toBe(new ServerError().message)
   })
-  test('should return 204 after delete task', async () => {
+  test('should return 204 if DeleteTaskUseCase return true', async () => {
     const { sut } = makeSut()
     const httpRequest = {
       body: {
@@ -89,5 +100,18 @@ describe('Delete task Router', () => {
     }
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(204)
+  })
+  test('should return 404 if DeleteTaskUseCase return null', async () => {
+    const deleteTaskUseCaseReturnNullSpy = makeDeleteTaskUseCaseReturnNullSpy()
+    const sut = new DeleteTaskRouter({
+      deleteTaskUseCase: deleteTaskUseCaseReturnNullSpy
+    })
+    const httpRequest = {
+      body: {
+        id: 'any id'
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(404)
   })
 })
