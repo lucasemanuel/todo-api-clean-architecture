@@ -41,4 +41,13 @@ describe('Task Routes', () => {
       .delete('/api/tasks/any_id')
       .expect(404)
   })
+  test('should return 204 if task deleted - /api/tasks/:id [Delete]', async () => {
+    await db
+      .collection('tasks')
+      .insertOne({ _id: 'any_id', description: 'any description' })
+
+    await request(app)
+      .delete('/api/tasks/any_id')
+      .expect(204)
+  })
 })
