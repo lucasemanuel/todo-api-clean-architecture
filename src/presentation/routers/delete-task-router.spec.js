@@ -49,7 +49,7 @@ describe('Delete task Router', () => {
     expect(httpResponse.statusCode).toBe(500)
     expect(httpResponse.body.error).toBe(new ServerError().message)
   })
-  test('should return 500 if no body is provided', async () => {
+  test('should return 500 if no httpRequest.params is provided', async () => {
     const { sut } = makeSut()
     const httpRequest = {}
     const httpResponse = await sut.route(httpRequest)
@@ -59,7 +59,7 @@ describe('Delete task Router', () => {
   test('should return 400 if no id is provided', async () => {
     const { sut } = makeSut()
     const httpRequest = {
-      body: {}
+      params: {}
     }
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(400)
@@ -71,7 +71,7 @@ describe('Delete task Router', () => {
       deleteTaskUseCase: deleteTaskUseCaseSpy
     })
     const httpRequest = {
-      body: {
+      params: {
         id: 'any id'
       }
     }
@@ -84,7 +84,7 @@ describe('Delete task Router', () => {
       deleteTaskUseCase: deleteTaskUseCaseWithErrorSpy
     })
     const httpRequest = {
-      body: {
+      params: {
         id: 'any id'
       }
     }
@@ -95,7 +95,7 @@ describe('Delete task Router', () => {
   test('should return 204 if DeleteTaskUseCase return true', async () => {
     const { sut } = makeSut()
     const httpRequest = {
-      body: {
+      params: {
         id: 'any id'
       }
     }
@@ -108,7 +108,7 @@ describe('Delete task Router', () => {
       deleteTaskUseCase: deleteTaskUseCaseReturnNullSpy
     })
     const httpRequest = {
-      body: {
+      params: {
         id: 'any id'
       }
     }
