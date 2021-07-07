@@ -72,17 +72,18 @@ describe('Task Respository', () => {
   })
   test('should return task by id', async () => {
     const { sut } = makeSut()
+    const id = MongoDB.objectId('any_identity')
     await db.collection('tasks').insertOne({
-      _id: 'any_id',
+      _id: id,
       description: 'any description',
       is_checked: true
     })
-    const task = await sut.findById('any_id')
+    const task = await sut.findById(id)
     expect(task).toBeInstanceOf(TaskEntity)
   })
   test('should return null if task not found in findById', async () => {
     const { sut } = makeSut()
-    const task = await sut.findById('any_id')
+    const task = await sut.findById('any_identity')
     expect(task).toBeNull()
   })
   test('should throw error if id is no provided in delete', () => {
@@ -92,22 +93,23 @@ describe('Task Respository', () => {
   })
   test('should return null if task not found in delete', async () => {
     const { sut } = makeSut()
-    const task = await sut.delete('any_id')
+    const task = await sut.delete('any_identity')
     expect(task).toBeNull()
   })
   test('should return true if task is deleted', async () => {
     const { sut } = makeSut()
+    const id = MongoDB.objectId('any_identity')
     await db.collection('tasks').insertOne({
-      _id: 'any_id',
+      _id: id,
       description: 'any description',
       is_checked: true
     })
 
-    const isDeleted = await sut.delete('any_id')
+    const isDeleted = await sut.delete(id)
     const task = await MongoDB.client
       .db()
       .collection('tasks')
-      .findOne({ _id: 'any_id' })
+      .findOne({ _id: id })
 
     expect(task).toBeNull()
     expect(isDeleted).toBeTruthy()

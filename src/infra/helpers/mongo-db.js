@@ -1,4 +1,4 @@
-const { MongoClient } = require('mongodb')
+const { MongoClient, ObjectID } = require('mongodb')
 const { mongoUri } = require('../config/env')
 
 module.exports = {
@@ -16,5 +16,8 @@ module.exports = {
       await this.client.close()
       this.client = null
     }
+  },
+  objectId (id) {
+    return new ObjectID(id)
   }
 }

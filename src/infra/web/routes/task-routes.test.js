@@ -36,16 +36,17 @@ describe('Task Routes', () => {
   })
   test('should return 404 if task is not found - [Http verb: Delete]', async () => {
     await request(app)
-      .delete('/api/tasks/any_id')
+      .delete('/api/tasks/any_identity')
       .expect(404)
   })
   test('should return 204 if task deleted - [Http verb: Delete]', async () => {
+    const id = MongoDB.objectId('any_identity')
     await db
       .collection('tasks')
-      .insertOne({ _id: 'any_id', description: 'any description' })
+      .insertOne({ _id: id, description: 'any description' })
 
     await request(app)
-      .delete('/api/tasks/any_id')
+      .delete(`/api/tasks/${id}`)
       .expect(204)
   })
 })

@@ -36,6 +36,7 @@ class TaskRepository {
 
   async findById (id) {
     if (!id) throw new MissingParamError('id')
+    id = MongoDB.objectId(id)
     const taskDocument = await MongoDB.client
       .db()
       .collection('tasks')
@@ -53,6 +54,7 @@ class TaskRepository {
 
   async delete (id) {
     if (!id) throw new MissingParamError('id')
+    id = MongoDB.objectId(id)
     const result = await MongoDB.client
       .db()
       .collection('tasks')
