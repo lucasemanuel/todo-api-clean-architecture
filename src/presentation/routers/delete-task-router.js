@@ -10,13 +10,10 @@ class DeleteTaskRouter {
     try {
       const { id } = httpRequest.body
       if (!id) return HttpResponse.badRequest(new MissingParamError('id'))
-      const result = await this.deleteTaskUseCase.execute(id)
-      if (result === null) {
-        return { statusCode: 404 }
-      }
-      return {
-        statusCode: 204
-      }
+
+      return (await this.deleteTaskUseCase.execute(id))
+        ? HttpResponse.noContent()
+        : HttpResponse.notFound('task')
     } catch (error) {
       return HttpResponse.serverError()
     }

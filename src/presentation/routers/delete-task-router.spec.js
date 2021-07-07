@@ -1,6 +1,7 @@
 const DeleteTaskRouter = require('./delete-task-router')
 const { MissingParamError } = require('../../utils/errors')
 const { ServerError } = require('../errors')
+const HttpResponse = require('../helpers/http-response')
 
 const makeDeleteTaskUseCaseWithErrorSpy = () => {
   class DeleteTaskUseCaseWithErrorSpy {
@@ -113,5 +114,8 @@ describe('Delete task Router', () => {
     }
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(404)
+    expect(httpResponse.body.error).toBe(
+      HttpResponse.notFound('task').body.error
+    )
   })
 })
