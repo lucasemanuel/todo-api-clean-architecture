@@ -19,11 +19,12 @@ class DeleteTaskUseCase {
   async execute (id) {
     this.taskRepositoryIsValid()
     if (!id) throw new MissingParamError('id')
+
     const task = await this.taskRepository.findById(id)
     if (task instanceof TaskEntity) {
-      await this.taskRepository.delete(id)
-      return true
+      return await this.taskRepository.delete(id)
     }
+    return null
   }
 }
 

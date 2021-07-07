@@ -29,6 +29,20 @@ const makeTaskRepositoryWithErrorSpy = () => {
   }
 }
 
+const makeTaskRepositoryMethodsReturnNullSpy = () => {
+  class TaskRepositoryFindByIdNullSpy {
+    async findById () {
+      return null
+    }
+
+    async delete () {
+      return null
+    }
+  }
+
+  return new TaskRepositoryFindByIdNullSpy()
+}
+
 const makeTaskRepositorySpy = () => {
   class TaskRepositorySpy {
     async findById (id) {
@@ -40,6 +54,7 @@ const makeTaskRepositorySpy = () => {
 
     async delete (id) {
       this.id = id
+      return true
     }
   }
 
@@ -99,9 +114,17 @@ describe('Delete Task Use Case', () => {
     await sut.execute('any id')
     expect(taskRepositorySpy.id).toBe('any id')
   })
-  test('should delete if the task is found', async () => {
+  test('should return true if task is deleted', async () => {
     const { sut } = makeSut()
     const result = await sut.execute('any id')
-    expect(result).toBe(true)
+    expect(result).toBeTruthy()
+  })
+  test('should return null if task not found', async () => {
+    const taskRepositoryFindByIdNullSpy = makeTaskRepositoryMethodsReturnNullSpy()
+    const sut = new DeleteTaskUseCase({
+      taskRepository: taskRepositoryFindByIdNullSpy
+    })
+    const result = await sut.execute('any id')
+    expect(result).toBeNull()
   })
 })
