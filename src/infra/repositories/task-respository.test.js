@@ -85,5 +85,11 @@ describe('Task Respository', () => {
     const task = await sut.findById('any_id')
     expect(task).toBeNull()
   })
+  test('should throw error if id is no provided in delete', () => {
+    const { sut } = makeSut()
+    const promise = sut.delete()
+    expect(promise).rejects.toThrow(new MissingParamError('id'))
+  })
   test.todo('should return null if task not found in delete')
+  test.todo('should return true if document is deleted')
 })

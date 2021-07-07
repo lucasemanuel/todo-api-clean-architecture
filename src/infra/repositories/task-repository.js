@@ -31,7 +31,6 @@ class TaskRepository {
         isChecked: document.is_checked
       })
     })
-
     return taskList
   }
 
@@ -50,6 +49,10 @@ class TaskRepository {
         })
       : null
     return task
+  }
+
+  async delete (id) {
+    if (!id) throw new MissingParamError('id')
   }
 }
 
