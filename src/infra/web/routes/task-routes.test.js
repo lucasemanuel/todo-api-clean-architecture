@@ -36,4 +36,9 @@ describe('Task Routes', () => {
     const response = await request(app).get('/api/tasks')
     expect(response.body).toHaveLength(3)
   })
+  test('should return 404 if task is not found - /api/tasks/:id [Delete]', async () => {
+    await request(app)
+      .delete('/api/tasks/any_id')
+      .expect(404)
+  })
 })
