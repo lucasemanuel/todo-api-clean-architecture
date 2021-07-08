@@ -20,6 +20,7 @@ describe('Task Respository', () => {
   })
   afterAll(async () => {
     await MongoDB.disconnect()
+    await db.collection('tasks').deleteMany()
   })
   test('should throw error if a description is invalid or no provided in method create', () => {
     const { sut } = makeSut()
@@ -116,14 +117,18 @@ describe('Task Respository', () => {
   })
   test('should return null if task not found in update', async () => {
     const { sut } = makeSut()
-    await db.collection('tasks').insertOne({
-      _id: MongoDB.objectId('any_identity'),
-      description: 'any description',
-      is_checked: true
-    })
-
-    const task = await sut.update('another_id')
+    const task = await sut.update('another_id', { isChecked: true })
     expect(task).toBeNull()
   })
+  test('should throw error if payload for update is no provided', async () => {
+    const { sut } = makeSut()
+    const suts = [sut.update('any_identity'), sut.update('any_identity', {})]
+    for (const promise of suts) {
+      expect(promise).rejects.toThrow(new MissingParamError('isChecked'))
+    }
+  })
   test.todo('should return task if is updated')
+  test.todo('should throw error if the id provided is invalid in update')
+  test.todo('should throw error if the id provided is invalid in delete')
+  test.todo('should throw error if the id provided is invalid in findByid')
 })

@@ -52,7 +52,9 @@ class TaskRepository {
     return task
   }
 
-  async update (id) {
+  async update (id, payload = {}) {
+    const { isChecked } = payload
+    if (!isChecked) throw new MissingParamError('isChecked')
     return null
   }
 
