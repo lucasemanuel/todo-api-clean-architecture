@@ -107,17 +107,14 @@ describe('Task Respository', () => {
     })
 
     const isDeleted = await sut.delete(id)
-    const task = await MongoDB.client
-      .db()
-      .collection('tasks')
-      .findOne({ _id: id })
+    const task = await db.collection('tasks').findOne({ _id: id })
 
     expect(task).toBeNull()
     expect(isDeleted).toBeTruthy()
   })
   test('should return null if task not found in update', async () => {
     const { sut } = makeSut()
-    const task = await sut.update('another_id', { isChecked: true })
+    const task = await sut.update('any_identity', { isChecked: true })
     expect(task).toBeNull()
   })
   test('should throw error if payload for update is no provided', async () => {
@@ -127,7 +124,21 @@ describe('Task Respository', () => {
       expect(promise).rejects.toThrow(new MissingParamError('isChecked'))
     }
   })
-  test.todo('should return task if is updated')
+  test('should return task if is updated', async () => {
+    const { sut } = makeSut()
+    const id = MongoDB.objectId('any_identity')
+    await db.collection('tasks').insertOne({
+      _id: id,
+      description: 'any description',
+      is_checked: false
+    })
+
+    const task = await sut.update('any_identity', { isChecked: true })
+    const taskDocument = await db.collection('tasks').findOne({ _id: id })
+
+    expect(task).toBeInstanceOf(TaskEntity)
+    expect(taskDocument.is_checked).toBeTruthy()
+  })
   test.todo('should throw error if the id provided is invalid in update')
   test.todo('should throw error if the id provided is invalid in delete')
   test.todo('should throw error if the id provided is invalid in findByid')
