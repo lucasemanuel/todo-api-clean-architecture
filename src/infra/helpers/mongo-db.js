@@ -1,5 +1,6 @@
 const { MongoClient, ObjectID } = require('mongodb')
 const { mongoUri } = require('../config/env')
+const { InvalidParamError } = require('../../utils/errors')
 
 module.exports = {
   async connect () {
@@ -18,6 +19,10 @@ module.exports = {
     }
   },
   objectId (id) {
-    return new ObjectID(id)
+    try {
+      return new ObjectID(id)
+    } catch (error) {
+      throw new InvalidParamError('id')
+    }
   }
 }

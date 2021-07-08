@@ -139,7 +139,15 @@ describe('Task Respository', () => {
     expect(task).toBeInstanceOf(TaskEntity)
     expect(taskDocument.is_checked).toBeTruthy()
   })
-  test.todo('should throw error if the id provided is invalid in update')
-  test.todo('should throw error if the id provided is invalid in delete')
-  test.todo('should throw error if the id provided is invalid in findByid')
+  test('should throw error if the id provided is invalid', () => {
+    const { sut } = makeSut()
+    const suts = [
+      sut.update('any_id', { isChecked: true }),
+      sut.delete('any_id'),
+      sut.findById('any_id')
+    ]
+    for (const promise of suts) {
+      expect(promise).rejects.toThrow(new InvalidParamError('id'))
+    }
+  })
 })
