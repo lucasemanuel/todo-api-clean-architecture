@@ -52,6 +52,10 @@ class TaskRepository {
     return task
   }
 
+  async update (id) {
+    return null
+  }
+
   async delete (id) {
     if (!id) throw new MissingParamError('id')
     id = MongoDB.objectId(id)

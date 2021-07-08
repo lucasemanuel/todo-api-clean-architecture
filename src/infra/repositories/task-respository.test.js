@@ -114,4 +114,16 @@ describe('Task Respository', () => {
     expect(task).toBeNull()
     expect(isDeleted).toBeTruthy()
   })
+  test('should return null if task not found in update', async () => {
+    const { sut } = makeSut()
+    await db.collection('tasks').insertOne({
+      _id: MongoDB.objectId('any_identity'),
+      description: 'any description',
+      is_checked: true
+    })
+
+    const task = await sut.update('another_id')
+    expect(task).toBeNull()
+  })
+  test.todo('should return task if is updated')
 })
