@@ -1,8 +1,14 @@
-const { MissingParamError } = require('../../utils/errors')
+const { MissingParamError, InvalidParamError } = require('../../utils/errors')
 
 class CheckTaskUseCase {
-  constructor ({ taskRepository }) {
+  constructor ({ taskRepository } = {}) {
     this.taskRepository = taskRepository
+  }
+
+  taskRepositoryIsValid () {
+    if (!this.taskRepository || !this.taskRepository.update) {
+      throw new InvalidParamError('taskRepository')
+    }
   }
 
   async execute (id) {
@@ -40,5 +46,18 @@ describe('Check task Use Case', () => {
     const sut = new CheckTaskUseCase({ taskRepository: taskRepositorySpy })
     await sut.execute('any_id')
     expect(taskRepositorySpy.id).toBe('any_id')
+  })
+  test('should throw error if TaskRepository is invalid', () => {
+    const suts = [
+      new CheckTaskUseCase(),
+      new CheckTaskUseCase({}),
+      new CheckTaskUseCase({ taskRepository: {} })
+    ]
+    for (const sut of suts) {
+      expect(() => {
+        sut.taskRepositoryIsValid()
+        sut.execute('any id')
+      }).toThrow(new InvalidParamError('taskRepository'))
+    }
   })
 })
