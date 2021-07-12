@@ -90,9 +90,9 @@ describe('Check task Use Case', () => {
     const promise = sut.execute(taskEntitySpy)
     expect(promise).rejects.toThrowError(DomainError)
   })
-  test('should return task', () => {
+  test('should return task', async () => {
     const { sut, taskEntitySpy } = makeSut()
-    const task = sut.execute(taskEntitySpy)
+    const task = await sut.execute(taskEntitySpy)
     expect(task).toBeTruthy()
   })
 })
