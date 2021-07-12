@@ -1,8 +1,17 @@
-const { MissingParamError } = require('../../utils/errors')
+const { MissingParamError, InvalidParamError } = require('../../utils/errors')
 
 const makeTaskEntitySpy = () => {
   class TaskEntitySpy {}
   return new TaskEntitySpy()
+}
+
+const makeTaskRepositoryWithErrorSpy = () => {
+  class TaskRepositoryWithErrorSpy {
+    async update () {
+      throw new Error()
+    }
+  }
+  return new TaskRepositoryWithErrorSpy()
 }
 
 const makeTaskRepositorySpy = () => {
@@ -16,12 +25,19 @@ const makeTaskRepositorySpy = () => {
 }
 
 class UncheckTaskUseCase {
-  constructor ({ taskRepository }) {
+  constructor ({ taskRepository } = {}) {
     this.taskRepository = taskRepository
+  }
+
+  taskRepositoryIsValid () {
+    if (!this.taskRepository?.update) {
+      throw new InvalidParamError('taskRepository')
+    }
   }
 
   async execute (task) {
     if (!task) throw new MissingParamError('task')
+    this.taskRepositoryIsValid()
     await this.taskRepository.update(task.id, { isChecked: false })
   }
 }
@@ -53,5 +69,26 @@ describe('Uncheck task Use Case', () => {
     const { sut, taskRepositorySpy, taskEntitySpy } = makeSut()
     await sut.execute(taskEntitySpy)
     expect(taskRepositorySpy.isChecked).toBe(false)
+  })
+  test('should throw error if TaskRepository is invalid', () => {
+    const { taskEntitySpy } = makeSut()
+    const suts = [
+      new UncheckTaskUseCase(),
+      new UncheckTaskUseCase({}),
+      new UncheckTaskUseCase({ taskRepository: {} })
+    ]
+    for (const sut of suts) {
+      const promise = sut.execute(taskEntitySpy)
+      expect(promise).rejects.toThrow(new InvalidParamError('taskRepository'))
+    }
+  })
+  test('should throw error if TaskRepository throws', async () => {
+    const taskRepositoryWithErrorSpy = makeTaskRepositoryWithErrorSpy()
+    const taskEntity = makeTaskEntitySpy()
+    const sut = new UncheckTaskUseCase({
+      taskRepository: taskRepositoryWithErrorSpy
+    })
+    const promise = sut.execute(taskEntity)
+    expect(promise).rejects.toThrow()
   })
 })
