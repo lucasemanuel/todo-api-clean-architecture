@@ -27,6 +27,7 @@ const makeTaskRepositorySpy = () => {
     async update (id, payload) {
       this.id = id
       this.isChecked = payload.isChecked
+      return true
     }
   }
   return new TaskRepositorySpy()
@@ -51,7 +52,8 @@ class UncheckTaskUseCase {
     } catch (error) {
       throw new DomainError(error.message)
     }
-    await this.taskRepository.update(task.id, { isChecked: false })
+    task = await this.taskRepository.update(task.id, { isChecked: false })
+    return task
   }
 }
 
@@ -110,5 +112,10 @@ describe('Uncheck task Use Case', () => {
     taskEntitySpy.isChecked = false
     const promise = sut.execute(taskEntitySpy)
     expect(promise).rejects.toThrowError(DomainError)
+  })
+  test('should return task', async () => {
+    const { sut, taskEntitySpy } = makeSut()
+    const task = await sut.execute(taskEntitySpy)
+    expect(task).toBeTruthy()
   })
 })
