@@ -1,7 +1,15 @@
-const { MissingParamError, InvalidParamError } = require('../../utils/errors')
+const {
+  MissingParamError,
+  InvalidParamError,
+  DomainError
+} = require('../../utils/errors')
 
 const makeTaskEntitySpy = () => {
-  class TaskEntitySpy {}
+  class TaskEntitySpy {
+    uncheck () {
+      if (!this.isChecked) throw new Error()
+    }
+  }
   return new TaskEntitySpy()
 }
 
@@ -38,13 +46,19 @@ class UncheckTaskUseCase {
   async execute (task) {
     if (!task) throw new MissingParamError('task')
     this.taskRepositoryIsValid()
+    try {
+      task.uncheck()
+    } catch (error) {
+      throw new DomainError(error.message)
+    }
     await this.taskRepository.update(task.id, { isChecked: false })
   }
 }
 
 const makeSut = () => {
-  const taskRepositorySpy = makeTaskRepositorySpy()
   const taskEntitySpy = makeTaskEntitySpy()
+  taskEntitySpy.isChecked = true
+  const taskRepositorySpy = makeTaskRepositorySpy()
   const sut = new UncheckTaskUseCase({ taskRepository: taskRepositorySpy })
   return {
     sut,
@@ -90,5 +104,11 @@ describe('Uncheck task Use Case', () => {
     })
     const promise = sut.execute(taskEntity)
     expect(promise).rejects.toThrow()
+  })
+  test('should throw DomainError if uncheck a task unchecked', () => {
+    const { sut, taskEntitySpy } = makeSut()
+    taskEntitySpy.isChecked = false
+    const promise = sut.execute(taskEntitySpy)
+    expect(promise).rejects.toThrowError(DomainError)
   })
 })
