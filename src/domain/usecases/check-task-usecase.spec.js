@@ -17,13 +17,21 @@ class CheckTaskUseCase {
   }
 }
 
+const makeTaskRepositoryWithErrorSpy = () => {
+  class TaskRepositoryWithErrorSpy {
+    async update (id) {
+      throw new Error()
+    }
+  }
+  return new TaskRepositoryWithErrorSpy()
+}
+
 const makeTaskRepositorySpy = () => {
   class TaskRepositorySpy {
     async update (id) {
       this.id = id
     }
   }
-
   return new TaskRepositorySpy()
 }
 
@@ -56,8 +64,16 @@ describe('Check task Use Case', () => {
     for (const sut of suts) {
       expect(() => {
         sut.taskRepositoryIsValid()
-        sut.execute('any id')
+        sut.execute('any_id')
       }).toThrow(new InvalidParamError('taskRepository'))
     }
+  })
+  test('should throw error if TaskRepository throws', async () => {
+    const taskRepositoryWithErrorSpy = makeTaskRepositoryWithErrorSpy()
+    const sut = new CheckTaskUseCase({
+      taskRepository: taskRepositoryWithErrorSpy
+    })
+    const promise = sut.execute('any_id')
+    expect(promise).rejects.toThrow()
   })
 })
