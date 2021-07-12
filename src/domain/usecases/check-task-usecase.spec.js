@@ -14,6 +14,7 @@ class CheckTaskUseCase {
   async execute (id) {
     if (!id) throw new MissingParamError('id')
     await this.taskRepository.update(id)
+    return null
   }
 }
 
@@ -75,5 +76,10 @@ describe('Check task Use Case', () => {
     })
     const promise = sut.execute('any_id')
     expect(promise).rejects.toThrow()
+  })
+  test('should return null if task not found', async () => {
+    const { sut } = makeSut()
+    const result = await sut.execute('any_id')
+    expect(result).toBeNull()
   })
 })
