@@ -1,15 +1,38 @@
 const { MissingParamError } = require('../../utils/errors')
 
+const makeTaskEntitySpy = () => {
+  class TaskEntitySpy {}
+  return new TaskEntitySpy()
+}
+
+const makeTaskRepositorySpy = () => {
+  class TaskRepositorySpy {
+    async update (id) {
+      this.id = id
+    }
+  }
+  return new TaskRepositorySpy()
+}
+
 class UncheckTaskUseCase {
+  constructor ({ taskRepository }) {
+    this.taskRepository = taskRepository
+  }
+
   async execute (task) {
     if (!task) throw new MissingParamError('task')
+    await this.taskRepository.update(task.id)
   }
 }
 
 const makeSut = () => {
-  const sut = new UncheckTaskUseCase()
+  const taskRepositorySpy = makeTaskRepositorySpy()
+  const taskEntitySpy = makeTaskEntitySpy()
+  const sut = new UncheckTaskUseCase({ taskRepository: taskRepositorySpy })
   return {
-    sut
+    sut,
+    taskEntitySpy,
+    taskRepositorySpy
   }
 }
 
@@ -18,5 +41,11 @@ describe('Uncheck task Use Case', () => {
     const { sut } = makeSut()
     const promise = sut.execute()
     expect(promise).rejects.toThrow(new MissingParamError('task'))
+  })
+  test('should call TaskRepository with correct id', async () => {
+    const { sut, taskRepositorySpy, taskEntitySpy } = makeSut()
+    taskEntitySpy.id = 'any_id'
+    await sut.execute(taskEntitySpy)
+    expect(taskRepositorySpy.id).toBe('any_id')
   })
 })
