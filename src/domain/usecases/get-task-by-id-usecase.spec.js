@@ -1,15 +1,31 @@
-const { MissingParamError } = require('../../utils/errors')
+const { MissingParamError, InvalidParamError } = require('../../utils/errors')
 
 class GetTaskByIdUseCase {
-  constructor ({ taskRepository }) {
+  constructor ({ taskRepository } = {}) {
     this.taskRepository = taskRepository
+  }
+
+  taskRepositoryIsValid () {
+    if (!this.taskRepository || !this.taskRepository.findById) {
+      throw new InvalidParamError('taskRepository')
+    }
   }
 
   async execute (id) {
     if (!id) throw new MissingParamError('id')
+    this.taskRepositoryIsValid()
     await this.taskRepository.findById(id)
     return null
   }
+}
+
+const makeTaskRepositoryWithErrorSpy = () => {
+  class TaskRepositoryWithErrorSpy {
+    async findById () {
+      throw new Error()
+    }
+  }
+  return new TaskRepositoryWithErrorSpy()
 }
 
 const makeTaskRepositorySpy = () => {
@@ -18,7 +34,6 @@ const makeTaskRepositorySpy = () => {
       this.id = id
     }
   }
-
   return new TaskRepositorySpy()
 }
 
@@ -48,5 +63,24 @@ describe('Get Task By Id Use Case', () => {
     const { sut, taskRepositorySpy } = makeSut()
     await sut.execute('any_id')
     expect(taskRepositorySpy.id).toBe('any_id')
+  })
+  test('should throw error if TaskRepository is invalid', () => {
+    const suts = [
+      new GetTaskByIdUseCase(),
+      new GetTaskByIdUseCase({}),
+      new GetTaskByIdUseCase({ taskRepository: {} })
+    ]
+    for (const sut of suts) {
+      const promise = sut.execute('any_id')
+      expect(promise).rejects.toThrow(new InvalidParamError('taskRepository'))
+    }
+  })
+  test('should throw error if TaskRepository throws', async () => {
+    const taskRepositoryWithErrorSpy = makeTaskRepositoryWithErrorSpy()
+    const sut = new GetTaskByIdUseCase({
+      taskRepository: taskRepositoryWithErrorSpy
+    })
+    const promise = sut.execute('any_id')
+    expect(promise).rejects.toThrow()
   })
 })
