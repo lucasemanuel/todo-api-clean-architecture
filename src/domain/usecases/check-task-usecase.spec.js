@@ -1,4 +1,8 @@
-const { MissingParamError, InvalidParamError } = require('../../utils/errors')
+const {
+  MissingParamError,
+  InvalidParamError,
+  DomainError
+} = require('../../utils/errors')
 
 class CheckTaskUseCase {
   constructor ({ taskRepository } = {}) {
@@ -16,9 +20,23 @@ class CheckTaskUseCase {
     if (!id) throw new MissingParamError('id')
     let task = await this.taskRepository.findById(id)
     if (task === null) return null
+    try {
+      task.check()
+    } catch (error) {
+      throw new DomainError(error.message)
+    }
     task = await this.taskRepository.update(id, { isChecked: true })
     return task
   }
+}
+
+const makeTaskEntitySpy = () => {
+  class TaskEntitySpy {
+    check () {
+      if (this.isChecked) throw new Error()
+    }
+  }
+  return new TaskEntitySpy()
 }
 
 const makeTaskRepositoryWithErrorSpy = () => {
@@ -47,10 +65,14 @@ const makeTaskRepositorySpy = () => {
 }
 
 const makeSut = () => {
+  const taskEntitySpy = makeTaskEntitySpy()
   const taskRepositorySpy = makeTaskRepositorySpy()
+  taskRepositorySpy.task = taskEntitySpy
   const sut = new CheckTaskUseCase({ taskRepository: taskRepositorySpy })
   return {
-    sut
+    sut,
+    taskRepositorySpy,
+    taskEntitySpy
   }
 }
 
@@ -61,14 +83,12 @@ describe('Check task Use Case', () => {
     expect(promise).rejects.toThrow(new MissingParamError('id'))
   })
   test('should call TaskRepository with correct id', async () => {
-    const taskRepositorySpy = makeTaskRepositorySpy()
-    const sut = new CheckTaskUseCase({ taskRepository: taskRepositorySpy })
+    const { sut, taskRepositorySpy } = makeSut()
     await sut.execute('any_id')
     expect(taskRepositorySpy.id).toBe('any_id')
   })
   test('should call TaskRepository with correct payload', async () => {
-    const taskRepositorySpy = makeTaskRepositorySpy()
-    const sut = new CheckTaskUseCase({ taskRepository: taskRepositorySpy })
+    const { sut, taskRepositorySpy } = makeSut()
     await sut.execute('any_id')
     expect(taskRepositorySpy.isChecked).toBeTruthy()
   })
@@ -104,5 +124,11 @@ describe('Check task Use Case', () => {
     const { sut } = makeSut()
     const result = await sut.execute('any id')
     expect(result).toBeTruthy()
+  })
+  test('should throw DomainError if check a task already checked', () => {
+    const { sut, taskRepositorySpy } = makeSut()
+    taskRepositorySpy.task.isChecked = true
+    const promise = sut.execute('any_id')
+    expect(promise).rejects.toThrowError(DomainError)
   })
 })
