@@ -15,17 +15,15 @@ class CheckTaskUseCase {
     }
   }
 
-  async execute (id) {
+  async execute (task) {
+    if (!task) throw new MissingParamError('task')
     this.taskRepositoryIsValid()
-    if (!id) throw new MissingParamError('id')
-    let task = await this.taskRepository.findById(id)
-    if (task === null) return null
     try {
       task.check()
     } catch (error) {
       throw new DomainError(error.message)
     }
-    task = await this.taskRepository.update(id, { isChecked: true })
+    task = await this.taskRepository.update(task.id, { isChecked: true })
     return task
   }
 }

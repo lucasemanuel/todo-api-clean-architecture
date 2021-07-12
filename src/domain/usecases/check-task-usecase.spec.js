@@ -30,11 +30,6 @@ const makeTaskRepositorySpy = () => {
       this.isChecked = payload.isChecked
       return true
     }
-
-    async findById (id) {
-      this.id = id
-      return this.task
-    }
   }
   return new TaskRepositorySpy()
 }
@@ -52,58 +47,52 @@ const makeSut = () => {
 }
 
 describe('Check task Use Case', () => {
-  test('should throw error if id is no provided', () => {
+  test('should throw error if task is no provided', () => {
     const { sut } = makeSut()
     const promise = sut.execute()
-    expect(promise).rejects.toThrow(new MissingParamError('id'))
+    expect(promise).rejects.toThrow(new MissingParamError('task'))
   })
   test('should call TaskRepository with correct id', async () => {
-    const { sut, taskRepositorySpy } = makeSut()
-    await sut.execute('any_id')
+    const { sut, taskRepositorySpy, taskEntitySpy } = makeSut()
+    taskEntitySpy.id = 'any_id'
+    await sut.execute(taskEntitySpy)
     expect(taskRepositorySpy.id).toBe('any_id')
   })
   test('should call TaskRepository with correct payload', async () => {
-    const { sut, taskRepositorySpy } = makeSut()
-    await sut.execute('any_id')
+    const { sut, taskRepositorySpy, taskEntitySpy } = makeSut()
+    await sut.execute(taskEntitySpy)
     expect(taskRepositorySpy.isChecked).toBeTruthy()
   })
   test('should throw error if TaskRepository is invalid', () => {
+    const { taskEntitySpy } = makeSut()
     const suts = [
       new CheckTaskUseCase(),
       new CheckTaskUseCase({}),
       new CheckTaskUseCase({ taskRepository: {} })
     ]
     for (const sut of suts) {
-      const promise = sut.execute('any_id')
+      const promise = sut.execute(taskEntitySpy)
       expect(promise).rejects.toThrow(new InvalidParamError('taskRepository'))
     }
   })
   test('should throw error if TaskRepository throws', async () => {
     const taskRepositoryWithErrorSpy = makeTaskRepositoryWithErrorSpy()
+    const taskEntity = makeTaskEntitySpy()
     const sut = new CheckTaskUseCase({
       taskRepository: taskRepositoryWithErrorSpy
     })
-    const promise = sut.execute('any_id')
+    const promise = sut.execute(taskEntity)
     expect(promise).rejects.toThrow()
   })
-  test('should return null if task not found', async () => {
-    const taskRepositorySpy = makeTaskRepositorySpy()
-    const sut = new CheckTaskUseCase({
-      taskRepository: taskRepositorySpy
-    })
-    taskRepositorySpy.task = null
-    const task = await sut.execute('invalid_id')
-    expect(task).toBeNull()
-  })
-  test('should return true if task is update', async () => {
-    const { sut } = makeSut()
-    const result = await sut.execute('any id')
-    expect(result).toBeTruthy()
-  })
   test('should throw DomainError if check a task already checked', () => {
-    const { sut, taskRepositorySpy } = makeSut()
-    taskRepositorySpy.task.isChecked = true
-    const promise = sut.execute('any_id')
+    const { sut, taskEntitySpy } = makeSut()
+    taskEntitySpy.isChecked = true
+    const promise = sut.execute(taskEntitySpy)
     expect(promise).rejects.toThrowError(DomainError)
+  })
+  test('should return task', () => {
+    const { sut, taskEntitySpy } = makeSut()
+    const task = sut.execute(taskEntitySpy)
+    expect(task).toBeTruthy()
   })
 })
