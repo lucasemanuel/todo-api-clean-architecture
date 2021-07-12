@@ -12,8 +12,11 @@ class CheckTaskUseCase {
   }
 
   async execute (id) {
+    this.taskRepositoryIsValid()
     if (!id) throw new MissingParamError('id')
-    const task = await this.taskRepository.update(id, { isChecked: true })
+    let task = await this.taskRepository.findById(id)
+    if (task === null) return null
+    task = await this.taskRepository.update(id, { isChecked: true })
     return task
   }
 }
@@ -32,8 +35,12 @@ const makeTaskRepositorySpy = () => {
     async update (id, payload = {}) {
       this.id = id
       this.isChecked = payload.isChecked
-      if (this.id === 'invalid_id') return null
       return true
+    }
+
+    async findById (id) {
+      this.id = id
+      return this.task
     }
   }
   return new TaskRepositorySpy()
@@ -72,10 +79,8 @@ describe('Check task Use Case', () => {
       new CheckTaskUseCase({ taskRepository: {} })
     ]
     for (const sut of suts) {
-      expect(() => {
-        sut.taskRepositoryIsValid()
-        sut.execute('any_id')
-      }).toThrow(new InvalidParamError('taskRepository'))
+      const promise = sut.execute('any_id')
+      expect(promise).rejects.toThrow(new InvalidParamError('taskRepository'))
     }
   })
   test('should throw error if TaskRepository throws', async () => {
@@ -87,9 +92,13 @@ describe('Check task Use Case', () => {
     expect(promise).rejects.toThrow()
   })
   test('should return null if task not found', async () => {
-    const { sut } = makeSut()
-    const result = await sut.execute('invalid_id')
-    expect(result).toBeNull()
+    const taskRepositorySpy = makeTaskRepositorySpy()
+    const sut = new CheckTaskUseCase({
+      taskRepository: taskRepositorySpy
+    })
+    taskRepositorySpy.task = null
+    const task = await sut.execute('invalid_id')
+    expect(task).toBeNull()
   })
   test('should return true if task is update', async () => {
     const { sut } = makeSut()
