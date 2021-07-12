@@ -9,7 +9,8 @@ class UpdateTaskRouter {
   async route (httpRequest) {
     try {
       const { id } = httpRequest.params
-      await this.getTaskByIdUseCase.execute(id)
+      const task = await this.getTaskByIdUseCase.execute(id)
+      if (!task) return HttpResponse.notFound('task')
     } catch (error) {
       return HttpResponse.serverError()
     }
@@ -60,5 +61,18 @@ describe('Update Task Router', () => {
     }
     await sut.route(httpRequest)
     expect(getTaskByIdUseCaseSpy.id).toBe('any_id')
+  })
+  test('should return 404 if GetTaskByIdUseCase does not return a task', async () => {
+    const { sut } = makeSut()
+    const httpRequest = {
+      params: {
+        id: 'any_id'
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(404)
+    expect(httpResponse.body.error).toBe(
+      HttpResponse.notFound('task').body.error
+    )
   })
 })
