@@ -7,8 +7,9 @@ const makeTaskEntitySpy = () => {
 
 const makeTaskRepositorySpy = () => {
   class TaskRepositorySpy {
-    async update (id) {
+    async update (id, payload) {
       this.id = id
+      this.isChecked = payload.isChecked
     }
   }
   return new TaskRepositorySpy()
@@ -21,7 +22,7 @@ class UncheckTaskUseCase {
 
   async execute (task) {
     if (!task) throw new MissingParamError('task')
-    await this.taskRepository.update(task.id)
+    await this.taskRepository.update(task.id, { isChecked: false })
   }
 }
 
@@ -47,5 +48,10 @@ describe('Uncheck task Use Case', () => {
     taskEntitySpy.id = 'any_id'
     await sut.execute(taskEntitySpy)
     expect(taskRepositorySpy.id).toBe('any_id')
+  })
+  test('should call TaskRepository with correct payload', async () => {
+    const { sut, taskRepositorySpy, taskEntitySpy } = makeSut()
+    await sut.execute(taskEntitySpy)
+    expect(taskRepositorySpy.isChecked).toBe(false)
   })
 })
