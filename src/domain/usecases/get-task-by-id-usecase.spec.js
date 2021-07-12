@@ -14,8 +14,8 @@ class GetTaskByIdUseCase {
   async execute (id) {
     if (!id) throw new MissingParamError('id')
     this.taskRepositoryIsValid()
-    await this.taskRepository.findById(id)
-    return null
+    const task = await this.taskRepository.findById(id)
+    return task || null
   }
 }
 
@@ -32,6 +32,7 @@ const makeTaskRepositorySpy = () => {
   class TaskRepositorySpy {
     async findById (id) {
       this.id = id
+      return this.task
     }
   }
   return new TaskRepositorySpy()
@@ -53,6 +54,16 @@ describe('Get Task By Id Use Case', () => {
     const { sut } = makeSut()
     const task = await sut.execute('any_id')
     expect(task).toBeNull()
+  })
+  test('should return task if is found', async () => {
+    const { sut, taskRepositorySpy } = makeSut()
+    taskRepositorySpy.task = {
+      id: 'any_id',
+      description: 'any_description',
+      isChecked: false
+    }
+    const task = await sut.execute('any id')
+    expect(task).toBeTruthy()
   })
   test('should throw error if id is no provided', () => {
     const { sut } = makeSut()
