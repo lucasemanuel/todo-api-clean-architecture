@@ -3,8 +3,9 @@ const { ServerError } = require('../errors')
 const { MissingParamError } = require('../../utils/errors')
 
 class UpdateTaskRouter {
-  constructor ({ getTaskByIdUseCase }) {
+  constructor ({ getTaskByIdUseCase, checkTaskUseCase }) {
     this.getTaskByIdUseCase = getTaskByIdUseCase
+    this.checkTaskUseCase = checkTaskUseCase
   }
 
   async route (httpRequest) {
@@ -13,6 +14,7 @@ class UpdateTaskRouter {
       if (!id) return HttpResponse.badRequest(new MissingParamError('id'))
       const task = await this.getTaskByIdUseCase.execute(id)
       if (!task) return HttpResponse.notFound('task')
+      await this.checkTaskUseCase.execute(task)
     } catch (error) {
       return HttpResponse.serverError()
     }
@@ -32,19 +34,32 @@ const makeGetTaskByIdUseCaseSpy = () => {
   class GetTaskByIdUseCaseSpy {
     async execute (id) {
       this.id = id
+      return this.task
     }
   }
   return new GetTaskByIdUseCaseSpy()
 }
 
+const makeCheckTaskUseCaseSpy = () => {
+  class CheckTaskUseCaseSpy {
+    async execute (task) {
+      this.task = task
+    }
+  }
+  return new CheckTaskUseCaseSpy()
+}
+
 const makeSut = () => {
   const getTaskByIdUseCaseSpy = makeGetTaskByIdUseCaseSpy()
+  const checkTaskUseCaseSpy = makeCheckTaskUseCaseSpy()
   const sut = new UpdateTaskRouter({
-    getTaskByIdUseCase: getTaskByIdUseCaseSpy
+    getTaskByIdUseCase: getTaskByIdUseCaseSpy,
+    checkTaskUseCase: checkTaskUseCaseSpy
   })
   return {
     sut,
-    getTaskByIdUseCaseSpy
+    getTaskByIdUseCaseSpy,
+    checkTaskUseCaseSpy
   }
 }
 
@@ -107,5 +122,24 @@ describe('Update Task Router', () => {
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(500)
     expect(httpResponse.body.error).toBe(new ServerError().message)
+  })
+  test('should call CheckTaskUseCase with correct params', async () => {
+    const { sut, getTaskByIdUseCaseSpy, checkTaskUseCaseSpy } = makeSut()
+    const httpRequest = {
+      params: {
+        id: 'any_id'
+      }
+    }
+    getTaskByIdUseCaseSpy.task = {
+      id: 'any_id',
+      description: 'any description',
+      isChecked: false
+    }
+    await sut.route(httpRequest)
+    expect(checkTaskUseCaseSpy.task).toEqual({
+      id: 'any_id',
+      description: 'any description',
+      isChecked: false
+    })
   })
 })
