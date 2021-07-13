@@ -57,25 +57,17 @@ class TaskRepository {
     id = MongoDB.objectId(id)
     if (!isChecked) throw new MissingParamError('isChecked')
 
-    const taskDocument = (
-      await MongoDB.client
-        .db()
-        .collection('tasks')
-        .findOneAndUpdate(
-          { _id: id },
-          {
-            $set: { is_checked: isChecked }
-          }
-        )
-    ).value
+    await MongoDB.client
+      .db()
+      .collection('tasks')
+      .updateOne(
+        { _id: id },
+        {
+          $set: { is_checked: isChecked }
+        }
+      )
 
-    return taskDocument
-      ? TaskAdapter.adapt({
-          id: taskDocument._id,
-          description: taskDocument.description,
-          isChecked: taskDocument.is_checked
-        })
-      : null
+    return (await this.findById(id)) || null
   }
 
   async delete (id) {
