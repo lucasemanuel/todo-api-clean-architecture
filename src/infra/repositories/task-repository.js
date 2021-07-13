@@ -55,7 +55,9 @@ class TaskRepository {
   async update (id, payload = {}) {
     const { isChecked } = payload
     id = MongoDB.objectId(id)
-    if (!isChecked) throw new MissingParamError('isChecked')
+    if (isChecked === undefined || isChecked === null) {
+      throw new MissingParamError('isChecked')
+    }
 
     await MongoDB.client
       .db()
