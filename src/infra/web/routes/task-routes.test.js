@@ -39,6 +39,11 @@ describe('Task Routes', () => {
       .delete('/api/tasks/any_identity')
       .expect(404)
   })
+  test('should return 404 if task is not found - [Http verb: Patch]', async () => {
+    await request(app)
+      .patch('/api/tasks/any_identity')
+      .expect(404)
+  })
   test('should return 204 if task deleted - [Http verb: Delete]', async () => {
     const id = MongoDB.objectId('any_identity')
     await db
@@ -48,5 +53,29 @@ describe('Task Routes', () => {
     await request(app)
       .delete(`/api/tasks/${id}`)
       .expect(204)
+  })
+  test('should return 200 if task is checked - [Http verb: Patch]', async () => {
+    const id = MongoDB.objectId('any_identity')
+    await db
+      .collection('tasks')
+      .insertOne({ _id: id, description: 'any description', is_checked: false })
+
+    const response = await request(app)
+      .patch(`/api/tasks/${id}`)
+      .expect(200)
+
+    expect(response.body.task.isChecked).toBeTruthy()
+  })
+  test.skip('should return 200 if task is unchecked - [Http verb: Patch]', async () => {
+    const id = MongoDB.objectId('any_identity')
+    await db
+      .collection('tasks')
+      .insertOne({ _id: id, description: 'any description', is_checked: true })
+
+    const response = await request(app)
+      .patch(`/api/tasks/${id}`)
+      .expect(200)
+
+    expect(response.body.task.isChecked).toBeFalsy()
   })
 })
