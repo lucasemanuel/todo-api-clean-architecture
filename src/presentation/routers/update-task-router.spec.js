@@ -15,8 +15,9 @@ class UpdateTaskRouter {
       if (!id) return HttpResponse.badRequest(new MissingParamError('id'))
       let task = await this.getTaskByIdUseCase.execute(id)
       if (!task) return HttpResponse.notFound('task')
-      task = await this.uncheckTaskUseCase.execute(task)
-      task = await this.checkTaskUseCase.execute(task)
+      task = task.isChecked
+        ? await this.uncheckTaskUseCase.execute(task)
+        : await this.checkTaskUseCase.execute(task)
       return HttpResponse.ok({ task })
     } catch (error) {
       return HttpResponse.serverError()
@@ -57,6 +58,7 @@ const makeCheckTaskUseCaseSpy = () => {
 const makeUncheckTaskUseCaseSpy = () => {
   class UncheckTaskUseCaseSpy {
     async execute (task) {
+      task.isChecked = false
       this.task = task
       return task
     }
@@ -176,7 +178,7 @@ describe('Update Task Router', () => {
     expect(uncheckTaskUseCaseSpy.task).toEqual({
       id: 'any_id',
       description: 'any description',
-      isChecked: true
+      isChecked: false
     })
   })
   test('should return task checked', async () => {
@@ -190,5 +192,17 @@ describe('Update Task Router', () => {
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(200)
     expect(httpResponse.body.task.isChecked).toBeTruthy()
+  })
+  test('should return task unchecked', async () => {
+    const { sut, getTaskByIdUseCaseSpy } = makeSut()
+    const httpRequest = {
+      params: {
+        id: 'any_id'
+      }
+    }
+    getTaskByIdUseCaseSpy.task = { isChecked: true }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(200)
+    expect(httpResponse.body.task.isChecked).toBeFalsy()
   })
 })
