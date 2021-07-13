@@ -19,13 +19,13 @@ describe('Task Entity', () => {
   })
   test('should uncheck a task', () => {
     const sut = makeTaskEntityChecked()
-    sut.unCheck()
+    sut.uncheck()
     expect(sut.isChecked).toBe(false)
   })
   test('should throw an error when trying uncheck a task not checked', () => {
     const sut = makeTaskEntity()
     expect(() => {
-      sut.unCheck()
+      sut.uncheck()
     }).toThrow()
   })
   test('should have the correct id value', () => {
