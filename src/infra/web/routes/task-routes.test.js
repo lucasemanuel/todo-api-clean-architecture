@@ -66,7 +66,7 @@ describe('Task Routes', () => {
 
     expect(response.body.task.isChecked).toBeTruthy()
   })
-  test.skip('should return 200 if task is unchecked - [Http verb: Patch]', async () => {
+  test('should return 200 if task is unchecked - [Http verb: Patch]', async () => {
     const id = MongoDB.objectId('any_identity')
     await db
       .collection('tasks')
