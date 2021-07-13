@@ -1,6 +1,13 @@
 const { ServerError } = require('../errors')
 
 module.exports = class HttpResponse {
+  static ok (body) {
+    return {
+      statusCode: 200,
+      body
+    }
+  }
+
   static noContent () {
     return {
       statusCode: 204

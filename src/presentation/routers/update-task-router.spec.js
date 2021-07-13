@@ -13,10 +13,11 @@ class UpdateTaskRouter {
     try {
       const { id } = httpRequest.params
       if (!id) return HttpResponse.badRequest(new MissingParamError('id'))
-      const task = await this.getTaskByIdUseCase.execute(id)
+      let task = await this.getTaskByIdUseCase.execute(id)
       if (!task) return HttpResponse.notFound('task')
-      await this.checkTaskUseCase.execute(task)
-      await this.uncheckTaskUseCase.execute(task)
+      task = await this.uncheckTaskUseCase.execute(task)
+      task = await this.checkTaskUseCase.execute(task)
+      return HttpResponse.ok({ task })
     } catch (error) {
       return HttpResponse.serverError()
     }
@@ -45,19 +46,22 @@ const makeGetTaskByIdUseCaseSpy = () => {
 const makeCheckTaskUseCaseSpy = () => {
   class CheckTaskUseCaseSpy {
     async execute (task) {
+      task.isChecked = true
       this.task = task
+      return task
     }
   }
   return new CheckTaskUseCaseSpy()
 }
 
 const makeUncheckTaskUseCaseSpy = () => {
-  class CheckTaskUseCaseSpy {
+  class UncheckTaskUseCaseSpy {
     async execute (task) {
       this.task = task
+      return task
     }
   }
-  return new CheckTaskUseCaseSpy()
+  return new UncheckTaskUseCaseSpy()
 }
 
 const makeSut = () => {
@@ -153,7 +157,7 @@ describe('Update Task Router', () => {
     expect(checkTaskUseCaseSpy.task).toEqual({
       id: 'any_id',
       description: 'any description',
-      isChecked: false
+      isChecked: true
     })
   })
   test('should call UncheckTaskUseCase with correct params', async () => {
@@ -174,5 +178,17 @@ describe('Update Task Router', () => {
       description: 'any description',
       isChecked: true
     })
+  })
+  test('should return task checked', async () => {
+    const { sut, getTaskByIdUseCaseSpy } = makeSut()
+    const httpRequest = {
+      params: {
+        id: 'any_id'
+      }
+    }
+    getTaskByIdUseCaseSpy.task = { isChecked: false }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(200)
+    expect(httpResponse.body.task.isChecked).toBeTruthy()
   })
 })
