@@ -19,13 +19,21 @@ class UpdateTaskRouter {
   }
 }
 
+const makeGetTaskByIdUseCaseWithErrorSpy = () => {
+  class GetTaskByIdUseCaseWithErrorSpy {
+    async execute () {
+      throw new Error()
+    }
+  }
+  return new GetTaskByIdUseCaseWithErrorSpy()
+}
+
 const makeGetTaskByIdUseCaseSpy = () => {
   class GetTaskByIdUseCaseSpy {
     async execute (id) {
       this.id = id
     }
   }
-
   return new GetTaskByIdUseCaseSpy()
 }
 
@@ -85,5 +93,19 @@ describe('Update Task Router', () => {
     const httpResponse = await sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(400)
     expect(httpResponse.body.error).toBe(new MissingParamError('id').message)
+  })
+  test('should return 500 if GetTaskByIdUseCase throw error', async () => {
+    const deleteTaskUseCaseWithErrorSpy = makeGetTaskByIdUseCaseWithErrorSpy()
+    const sut = new UpdateTaskRouter({
+      deleteTaskUseCase: deleteTaskUseCaseWithErrorSpy
+    })
+    const httpRequest = {
+      params: {
+        id: 'any id'
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body.error).toBe(new ServerError().message)
   })
 })
